@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/luisgomez29/gestion-consultas-api/api/routers"
 	"log"
+	"net/http"
 
+	"github.com/labstack/echo/v4"
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
-	"github.com/luisgomez29/gestion-consultas-api/api/database"
 )
 
 func main() {
@@ -15,8 +18,18 @@ func main() {
 		log.Fatal("Cannot load config: ", err)
 	}
 
-	database.ConnectDB(cfg.Database)
-	defer database.DB.Close()
+	e := echo.New()
 
-	fmt.Println("CONFIG", cfg)
+	// Middleware
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello world!")
+	})
+
+	routers.SetupRoutes(e)
+
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", cfg.Server.Port)))
+
 }

@@ -1,5 +1,0 @@
-CREATE TABLE rooms
-(
-    id   SERIAL PRIMARY KEY,
-    name VARCHAR(60) NOT NULL
-);

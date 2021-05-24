@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/luisgomez29/gestion-consultas-api/api/routers"
 	"log"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
+	"github.com/luisgomez29/gestion-consultas-api/api/routers"
 )
 
 func main() {
@@ -23,10 +23,6 @@ func main() {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello world!")
-	})
 
 	routers.SetupRoutes(e)
 

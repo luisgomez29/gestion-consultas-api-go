@@ -3,10 +3,10 @@ package database
 import (
 	"context"
 	"fmt"
-	"github.com/spf13/viper"
 	"log"
 
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/spf13/viper"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
 )

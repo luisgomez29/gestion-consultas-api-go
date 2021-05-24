@@ -1,6 +1,8 @@
 /*
  * Author: Luis Guillermo Gómez Galeano
- * Create initial database schema
+ * Create initial database schema.
+ *
+ * The created_at and updated_at fields have the default value CURRENT_TIMESTAMP
  */
 
 --
@@ -65,9 +67,10 @@ CREATE TABLE users
     address               VARCHAR(60),
     is_active             boolean                        NOT NULL,
     is_staff              boolean                        NOT NULL,
+    is_superuser          boolean                        NOT NULL,
     last_login            TIMESTAMPTZ,
-    created_at            TIMESTAMPTZ                    NOT NULL,
-    updated_at            TIMESTAMPTZ                    NOT NULL
+    created_at            TIMESTAMPTZ                    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at            TIMESTAMPTZ                    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 --
@@ -107,8 +110,8 @@ CREATE TABLE appointments
     audio       VARCHAR(255),
     start_time  DATE,
     end_time    DATE,
-    created_at  TIMESTAMPTZ NOT NULL,
-    updated_at  TIMESTAMPTZ NOT NULL
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 --
@@ -121,7 +124,7 @@ CREATE TABLE rooms
     name          VARCHAR(60) NOT NULL UNIQUE,
     user_owner    INTEGER     NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     user_receiver INTEGER     NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    created_at    TIMESTAMPTZ NOT NULL
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 --
@@ -143,6 +146,6 @@ CREATE TABLE messages
     user_id    INTEGER            NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     type       enum_messages_type NOT NULL,
     content    TEXT               NOT NULL,
-    created_at TIMESTAMPTZ        NOT NULL,
-    updated_at TIMESTAMPTZ        NOT NULL
+    created_at TIMESTAMPTZ        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ        NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

@@ -2,14 +2,14 @@ package repositories
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
+
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4/pgxpool"
+
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
 )
 
-type UserRepository interface {
+type UsersRepository interface {
 	All() ([]*models.User, error)
 	FindById(uint) (*models.User, error)
 	Create(*models.User) (*models.User, error)
@@ -17,16 +17,17 @@ type UserRepository interface {
 	Delete(uint) (uint, error)
 }
 
-type database struct {
+type userRepositoryDB struct {
 	conn *pgxpool.Pool
 }
 
-func NewUserRepository(db *pgxpool.Pool) UserRepository {
-	return &database{db}
+func NewUsersRepository(db *pgxpool.Pool) UsersRepository {
+	return &userRepositoryDB{conn: db}
 }
 
-func (db *database) All() ([]*models.User, error) {
-	query := `SELECT id, role, first_name, last_name, identification_type, identification_number, username, email,
+func (db *userRepositoryDB) All() ([]*models.User, error) {
+	query := `
+		SELECT id, role, first_name, last_name, identification_type, identification_number, username, email,
 		password, phone, picture, city, neighborhood, address, is_active, is_staff, last_login, created_at, updated_at 
 		FROM users;`
 
@@ -35,27 +36,25 @@ func (db *database) All() ([]*models.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("USERS => %v", users[0])
-	us, err := json.Marshal(users)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Printf("\n\nJSON %s", string(us))
 	return users, nil
 }
 
-func (db *database) FindById(u uint) (*models.User, error) {
+func (db *userRepositoryDB) FindById(u uint) (*models.User, error) {
 	panic("implement me")
 }
 
-func (db *database) Create(user *models.User) (*models.User, error) {
+func (db *userRepositoryDB) Create(user *models.User) (*models.User, error) {
+	//query := `
+	//	INSERT INTO users(role, first_name, last_name, identification_type, identification_number, username, email,
+	//    password, phone, picture, city, neighborhood, address, is_active, is_staff, last_login)
+	//	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`
 	panic("implement me")
 }
 
-func (db *database) Update(u uint, user *models.User) (*models.User, error) {
+func (db *userRepositoryDB) Update(u uint, user *models.User) (*models.User, error) {
 	panic("implement me")
 }
 
-func (db *database) Delete(u uint) (uint, error) {
+func (db *userRepositoryDB) Delete(u uint) (uint, error) {
 	panic("implement me")
 }

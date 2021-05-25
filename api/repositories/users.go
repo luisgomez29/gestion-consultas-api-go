@@ -27,8 +27,8 @@ func NewUsersRepository(db *pgxpool.Pool) UsersRepository {
 
 func (db *userRepositoryDB) All() ([]*models.User, error) {
 	query := `
-		SELECT id, role, first_name, last_name, identification_type, identification_number, username, email,
-		password, phone, picture, city, neighborhood, address, is_active, is_staff, last_login, created_at, updated_at 
+		SELECT id, role, first_name, last_name, identification_type, identification_number, username, email, phone,
+		picture, city, neighborhood, address, is_active, is_staff, is_superuser, last_login, created_at, updated_at
 		FROM users;`
 
 	var users []*models.User

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -19,11 +20,16 @@ func SignUp(c echo.Context) error {
 		return err
 	}
 
-	repo := repositories.NewAccountRepository(db)
+	if err := signup.Validate(); err != nil {
+		return responses.ValidationErrorResponse(c, err)
+	}
+
+	repo := repositories.NewAuthRepository(db)
 
 	res, err := repo.SignUp(signup)
 	if err != nil {
-		return err
+		fmt.Printf("ERRORR : %v", err)
+		return responses.ValidationErrorResponse(c, err)
 	}
 	return c.JSON(http.StatusCreated, res)
 }

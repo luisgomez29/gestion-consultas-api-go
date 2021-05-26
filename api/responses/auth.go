@@ -53,12 +53,12 @@ var (
 
 	phoneRule = []validation.Rule{
 		validation.Required.Error("el teléfono es requerido"),
-		validation.Match(utils.ReCellPhone).Error("El teléfono ingresado no es válido"),
+		validation.Match(utils.ReCellPhone).Error("el teléfono ingresado no es válido"),
 	}
 
 	cityRule = []validation.Rule{
 		validation.Required.Error("la ciudad es requerida"),
-		validation.Match(utils.ReLettersOnly).Error("El nombre de la ciudad debe tener solo letras (A-Z)"),
+		validation.Match(utils.ReLettersOnly).Error("el nombre de la ciudad debe tener solo letras (A-Z)"),
 	}
 
 	neighborhoodRule = []validation.Rule{

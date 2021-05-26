@@ -7,10 +7,9 @@ import (
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
 	"github.com/labstack/echo/v4"
-
-	"github.com/jackc/pgconn"
 )
 
 const (

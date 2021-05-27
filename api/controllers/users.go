@@ -5,16 +5,25 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/luisgomez29/gestion-consultas-api/api/database"
 	"github.com/luisgomez29/gestion-consultas-api/api/repositories"
 )
 
-func UserList(c echo.Context) error {
-	db := database.ConnectDB()
-	defer db.Close()
+// UsersController encapsula la lógica de negocio para los usuarios
+type UsersController interface {
+	UserList(c echo.Context) error
+}
 
-	repo := repositories.NewUsersRepository(db)
-	users, err := repo.All()
+type usersController struct {
+	repo repositories.UsersRepository
+}
+
+// NewUsersController crea un nuevo controlador de usuarios
+func NewUsersController(repo repositories.UsersRepository) UsersController {
+	return usersController{repo: repo}
+}
+
+func (ctrl usersController) UserList(c echo.Context) error {
+	users, err := ctrl.repo.All()
 	if err != nil {
 		return err
 	}

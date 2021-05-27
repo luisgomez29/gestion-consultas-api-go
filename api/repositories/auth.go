@@ -11,19 +11,21 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
 )
 
+// AuthRepository encapsula la lógica para acceder a los usuarios desde la base de datos
 type AuthRepository interface {
 	SignUp(res *responses.SignUpResponse) (*responses.SignUpResponse, error)
 }
 
-type authRepositoryDB struct {
+type authRepository struct {
 	conn *pgxpool.Pool
 }
 
+// NewAuthRepository crea un nuevo repositorio de autenticación
 func NewAuthRepository(db *pgxpool.Pool) AuthRepository {
-	return &authRepositoryDB{conn: db}
+	return authRepository{conn: db}
 }
 
-func (db *authRepositoryDB) SignUp(res *responses.SignUpResponse) (*responses.SignUpResponse, error) {
+func (db authRepository) SignUp(res *responses.SignUpResponse) (*responses.SignUpResponse, error) {
 	query := `
 		INSERT INTO users(role, first_name, last_name, identification_type, identification_number, username, email,
 		password, phone, city, neighborhood, address, is_active, is_staff, is_superuser)

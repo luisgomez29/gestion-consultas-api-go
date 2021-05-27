@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -71,5 +70,5 @@ func (*User) ValidatePgError(err error) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "error al registrar usuario")
 	}
 
-	return fmt.Errorf("error: %v", err)
+	return echo.NewHTTPError(http.StatusInternalServerError, err)
 }

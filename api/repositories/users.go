@@ -9,23 +9,25 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
 )
 
+// UsersRepository encapsula la lógica para acceder a los usuarios desde la base de datos
 type UsersRepository interface {
 	All() ([]*models.User, error)
-	FindById(uint) (*models.User, error)
-	Create(*models.User) (*models.User, error)
-	Update(uint, *models.User) (*models.User, error)
-	Delete(uint) (uint, error)
+	FindById(id uint) (*models.User, error)
+	Create(u *models.User) (*models.User, error)
+	Update(id uint, u *models.User) (*models.User, error)
+	Delete(id uint) (uint, error)
 }
 
-type userRepositoryDB struct {
+type usersRepository struct {
 	conn *pgxpool.Pool
 }
 
+// NewUsersRepository crea un nuevo repositorio de usuarios
 func NewUsersRepository(db *pgxpool.Pool) UsersRepository {
-	return &userRepositoryDB{conn: db}
+	return usersRepository{conn: db}
 }
 
-func (db *userRepositoryDB) All() ([]*models.User, error) {
+func (db usersRepository) All() ([]*models.User, error) {
 	query := `
 		SELECT id, role, first_name, last_name, identification_type, identification_number, username, email, phone,
 		picture, city, neighborhood, address, is_active, is_staff, is_superuser, last_login, created_at, updated_at
@@ -39,11 +41,11 @@ func (db *userRepositoryDB) All() ([]*models.User, error) {
 	return users, nil
 }
 
-func (db *userRepositoryDB) FindById(u uint) (*models.User, error) {
+func (db usersRepository) FindById(id uint) (*models.User, error) {
 	panic("implement me")
 }
 
-func (db *userRepositoryDB) Create(user *models.User) (*models.User, error) {
+func (db usersRepository) Create(u *models.User) (*models.User, error) {
 	//query := `
 	//	INSERT INTO users(role, first_name, last_name, identification_type, identification_number, username, email,
 	//    password, phone, picture, city, neighborhood, address, is_active, is_staff, last_login)
@@ -51,10 +53,10 @@ func (db *userRepositoryDB) Create(user *models.User) (*models.User, error) {
 	panic("implement me")
 }
 
-func (db *userRepositoryDB) Update(u uint, user *models.User) (*models.User, error) {
+func (db usersRepository) Update(u uint, user *models.User) (*models.User, error) {
 	panic("implement me")
 }
 
-func (db *userRepositoryDB) Delete(u uint) (uint, error) {
+func (db usersRepository) Delete(u uint) (uint, error) {
 	panic("implement me")
 }

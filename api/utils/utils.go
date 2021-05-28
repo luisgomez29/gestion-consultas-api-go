@@ -2,6 +2,7 @@ package utils
 
 import (
 	"regexp"
+	"time"
 )
 
 // Expresiones regulares
@@ -13,10 +14,8 @@ var (
 	ReLetters     = regexp.MustCompile("^[a-zA-z]+$")
 )
 
-// DatabaseValidationError define los métodos para verificar los errores de la base de datos
-type DatabaseValidationError interface {
-
-	// ValidatePgError verifica el error de la base de datos.
-	// Se debe usar para verificar los errores de unicidad y otros de los campos.
-	ValidatePgError(err error) error
+type Model struct {
+	ID        uint      `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

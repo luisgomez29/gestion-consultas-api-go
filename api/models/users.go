@@ -9,6 +9,8 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
 	"github.com/labstack/echo/v4"
+
+	"github.com/luisgomez29/gestion-consultas-api/api/utils"
 )
 
 const (
@@ -30,7 +32,7 @@ const (
 
 // User representa la tabla users en la DB
 type User struct {
-	ID                   uint       `json:"id"`
+	utils.Model
 	Role                 string     `json:"role"`
 	FirstName            string     `json:"first_name"`
 	LastName             string     `json:"last_name"`
@@ -44,12 +46,10 @@ type User struct {
 	City                 string     `json:"city"`
 	Neighborhood         *string    `json:"neighborhood"`
 	Address              *string    `json:"address"`
-	IsActive             bool       `json:"is_active"`
-	IsStaff              bool       `json:"is_staff"`
-	IsSuperuser          bool       `json:"is_superuser"`
+	IsActive             bool       `json:"is_active,omitempty"`
+	IsStaff              bool       `json:"is_staff,omitempty"`
+	IsSuperuser          bool       `json:"is_superuser,omitempty"`
 	LastLogin            *time.Time `json:"last_login"`
-	CreatedAt            time.Time  `json:"created_at"`
-	UpdatedAt            time.Time  `json:"updated_at"`
 }
 
 func (*User) ValidatePgError(err error) error {
@@ -67,7 +67,7 @@ func (*User) ValidatePgError(err error) error {
 				return validation.Errors{"username": e}
 			}
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, "error al registrar usuario")
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return echo.NewHTTPError(http.StatusInternalServerError, err)

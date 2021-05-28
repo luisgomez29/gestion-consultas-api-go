@@ -45,7 +45,7 @@ API REST para la gestión de consultas con GO.
    Donde el valor de la variable de entorno `DBPWD` es la contraseña de la base de datos.
 
 
-7. Configurar variables de entorno en el archivo `config.yml` (Ver el archivo `config.example.yml`).
+7. Configurar variables de entorno en el archivo `.env` (Ver el archivo `.env.example`).
 
 
 9. Ejecutar el servidor local:

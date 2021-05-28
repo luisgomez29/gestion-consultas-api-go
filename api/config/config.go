@@ -1,38 +1,18 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"log"
 
-// Config variables de entorno
-type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-}
+	"github.com/joho/godotenv"
+)
 
-// ServerConfig variables de entorno de servidor
-type ServerConfig struct {
-	Port string
-}
+// Load lee las configuraciones del archivo .env
+func Load() (env map[string]string) {
+	env, err := godotenv.Read()
 
-// DatabaseConfig variables de entorno de la base de datos
-type DatabaseConfig struct {
-	Host     string
-	Name     string
-	User     string
-	Password string
-	Port     string
-}
-
-// Load lee las configuraciones del archivo de configuración dentro de la ruta si existe.
-func Load(path string) (config *Config, err error) {
-	viper.AddConfigPath(path)
-	viper.SetConfigName("config")
-	viper.SetConfigType("yml")
-	viper.AutomaticEnv()
-
-	if err = viper.ReadInConfig(); err != nil {
-		return
+	if err != nil {
+		log.Fatal("Error reading .env file")
 	}
 
-	err = viper.Unmarshal(&config)
 	return
 }

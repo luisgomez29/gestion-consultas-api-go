@@ -6,16 +6,14 @@ import (
 	"log"
 
 	"github.com/jackc/pgx/v4/pgxpool"
-
-	"github.com/luisgomez29/gestion-consultas-api/api/config"
 )
 
 // ConnectDB permite conectarse a la base de datos
-func ConnectDB(cfg config.DatabaseConfig) *pgxpool.Pool {
+func ConnectDB(cfg map[string]string) *pgxpool.Pool {
 	// postgres://username:password@url.com:port/dbName
 	DSN := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable&timezone=America/Bogota",
-		cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name,
+		cfg["DB_USER"], cfg["DB_PWD"], cfg["DB_HOST"], cfg["DB_PORT"], cfg["DB_NAME"],
 	)
 
 	DB, err := pgxpool.Connect(context.Background(), DSN)

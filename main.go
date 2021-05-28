@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/labstack/echo/v4"
@@ -11,30 +10,32 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
 	ctrl "github.com/luisgomez29/gestion-consultas-api/api/controllers"
 	"github.com/luisgomez29/gestion-consultas-api/api/database"
+	"github.com/luisgomez29/gestion-consultas-api/api/errors"
 	repo "github.com/luisgomez29/gestion-consultas-api/api/repositories"
 	"github.com/luisgomez29/gestion-consultas-api/api/router"
 )
 
 func main() {
-	cfg, err := config.Load(".")
+	cfg := config.Load()
 
-	if err != nil {
-		log.Fatal("Cannot load config: ", err)
-	}
-
-	db := database.ConnectDB(cfg.Database)
+	db := database.ConnectDB(cfg)
 	defer db.Close()
 
 	e := echo.New()
 
 	// Middleware
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	e.Use(
+		middleware.Logger(),
+		middleware.Recover(),
+		middleware.Secure(),
+		errors.ErrorHandler,
+	)
+	//e.Use()
 
 	// Routes
 	setupRoutes(db, e)
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", cfg.Server.Port)))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", cfg["SERVER_PORT"])))
 }
 
 // setupRoutes establece las rutas disponibles de la API

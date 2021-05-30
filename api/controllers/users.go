@@ -24,7 +24,6 @@ func NewUsersController(repo repositories.UsersRepository) UsersController {
 }
 
 func (ctrl usersController) UserList(c echo.Context) error {
-
 	if _, ok := auth.IsAuthenticated(c); ok {
 		users, err := ctrl.repo.All()
 		if err != nil {

@@ -23,7 +23,7 @@ func Authentication(isRequired bool) echo.MiddlewareFunc {
 				if err != nil {
 					return err
 				}
-				ac, err := auth.ExtractAccessDetails(token)
+				ac, err := auth.TokenPayload(token)
 				if err != nil {
 					return err
 				}

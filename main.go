@@ -16,9 +16,7 @@ import (
 )
 
 func main() {
-	cfg := config.Load()
-
-	db := database.ConnectDB(cfg)
+	db := database.ConnectDB()
 	defer db.Close()
 
 	e := echo.New()
@@ -34,7 +32,7 @@ func main() {
 	// Routes
 	setupRoutes(db, e)
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", cfg["SERVER_PORT"])))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", config.Load("SERVER_PORT"))))
 }
 
 // setupRoutes establece las rutas disponibles de la API

@@ -3,18 +3,18 @@ package auth
 import (
 	"errors"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 
+	"github.com/luisgomez29/gestion-consultas-api/api/config"
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
 )
 
 // jwtSecretKet es la clave para firmar los tokens
-var jwtSecretKet = []byte(os.Getenv("JWT_ACCESS_SECRET"))
+var jwtSecretKet = []byte(config.Load("JWT_ACCESS_SECRET"))
 
 // GenerateToken genera el token de acceso
 func GenerateToken(username string) (string, error) {
@@ -74,8 +74,8 @@ func ExtractToken(r *http.Request) string {
 	return ""
 }
 
-// ExtractAccessDetails obtiene el usuario del token y retorna un AccessDetails
-func ExtractAccessDetails(token *jwt.Token) (*AccessDetails, error) {
+// TokenPayload obtiene el payload del token y retorna un AccessDetails.
+func TokenPayload(token *jwt.Token) (*AccessDetails, error) {
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
 		return &AccessDetails{Username: claims["username"].(string)}, nil

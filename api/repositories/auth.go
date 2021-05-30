@@ -2,8 +2,8 @@ package repositories
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/jinzhu/copier"
 
@@ -14,6 +14,7 @@ import (
 // AuthRepository encapsula la lógica para acceder a los usuarios desde la base de datos
 type AuthRepository interface {
 	SignUp(res *responses.SignUpResponse) (*models.User, error)
+	Login(res *responses.LoginResponse) (*models.User, error)
 }
 
 type authRepository struct {
@@ -33,13 +34,12 @@ func (db authRepository) SignUp(res *responses.SignUpResponse) (*models.User, er
 		RETURNING id, created_at, updated_at`
 
 	user := new(models.User)
-
 	if err := copier.Copy(user, res); err != nil {
 		return nil, err
 	}
+
 	user.Role = models.UserDefault
 	user.IsActive = true
-	fmt.Printf("\n\n%#v\n\n", user)
 
 	err := db.conn.QueryRow(
 		context.Background(), query, user.Role, user.FirstName, user.LastName, user.IdentificationType,
@@ -51,4 +51,18 @@ func (db authRepository) SignUp(res *responses.SignUpResponse) (*models.User, er
 		return nil, user.ValidatePgError(err)
 	}
 	return responses.UserResponse(user), nil
+}
+
+func (db authRepository) Login(res *responses.LoginResponse) (*models.User, error) {
+	query := `
+		SELECT id, role, first_name, last_name, identification_type, identification_number, username, email, password,
+		phone, picture, city, neighborhood, address, is_active, is_staff, is_superuser, last_login, created_at, updated_at
+		FROM users WHERE username = $1;`
+
+	user := new(models.User)
+	err := pgxscan.Get(context.Background(), db.conn, user, query, &res.Username)
+	if err != nil {
+		return nil, user.ValidatePgError(err)
+	}
+	return user, nil
 }

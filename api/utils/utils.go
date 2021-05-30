@@ -14,6 +14,8 @@ var (
 	ReLetters     = regexp.MustCompile("^[a-zA-z]+$")
 )
 
+// Model incluye los campos ID, CreatedAt, UpdatedAt.
+// Es usada en la definición de los modelos.
 type Model struct {
 	ID        uint      `json:"id"`
 	CreatedAt time.Time `json:"created_at"`

@@ -10,9 +10,9 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
 	ctrl "github.com/luisgomez29/gestion-consultas-api/api/controllers"
 	"github.com/luisgomez29/gestion-consultas-api/api/database"
-	"github.com/luisgomez29/gestion-consultas-api/api/errors"
+	"github.com/luisgomez29/gestion-consultas-api/api/middlewares"
 	repo "github.com/luisgomez29/gestion-consultas-api/api/repositories"
-	"github.com/luisgomez29/gestion-consultas-api/api/router"
+	"github.com/luisgomez29/gestion-consultas-api/api/routes"
 )
 
 func main() {
@@ -28,9 +28,8 @@ func main() {
 		middleware.Logger(),
 		middleware.Recover(),
 		middleware.Secure(),
-		errors.ErrorHandler,
+		middlewares.ErrorHandler,
 	)
-	//e.Use()
 
 	// Routes
 	setupRoutes(db, e)
@@ -45,7 +44,8 @@ func setupRoutes(db *pgxpool.Pool, e *echo.Echo) {
 	v1 := api.Group("/v1")
 
 	// Auth
-	router.AuthHandlers(v1, ctrl.NewAuthController(repo.NewAuthRepository(db)))
+	routes.AuthHandlers(v1, ctrl.NewAuthController(repo.NewAuthRepository(db)))
+
 	// Users
-	router.UsersHandlers(v1, ctrl.NewUsersController(repo.NewUsersRepository(db)))
+	routes.UsersHandlers(v1, ctrl.NewUsersController(repo.NewUsersRepository(db)))
 }

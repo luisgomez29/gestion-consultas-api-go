@@ -128,6 +128,6 @@ type LoginResponse struct {
 func (l *LoginResponse) Validate() error {
 	return validation.ValidateStruct(l,
 		validation.Field(&l.Username, usernameRule...),
-		validation.Field(&l.Password, passwordRule...),
+		validation.Field(&l.Password, validation.Required.Error("la contraseña es requerida")),
 	)
 }

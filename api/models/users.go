@@ -8,6 +8,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/utils"
@@ -53,8 +54,11 @@ type User struct {
 }
 
 func (*User) ValidatePgError(err error) error {
-	var pgErr *pgconn.PgError
+	if errors.Is(err, pgx.ErrNoRows) {
+		return echo.NewHTTPError(http.StatusBadRequest, "usuario o contraseña incorrectos")
+	}
 
+	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
 		if pgErr.Code == pgerrcode.UniqueViolation {
 			switch pgErr.ConstraintName {

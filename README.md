@@ -54,6 +54,23 @@ API REST para la gestión de consultas con GO.
     go run main.go
    ```
 
+## Endpoints
+
+La API REST proporciona las siguientes rutas:
+
+### Auth
+
+| Name | Route | Protected | Method |
+| ---- | ----- | --------- | ------ |
+| signup | /signup | No | POST |
+| login | /login | No | POST |
+
+### Users
+
+| Name | Route | Protected | Method |
+| ---- | ----- | --------- | ------ |
+| Users list  | /users | Yes | GET |
+
 ## Author
 
 **Luis Guillermo Gómez**

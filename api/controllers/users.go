@@ -11,7 +11,7 @@ import (
 
 // UsersController encapsula la lógica de negocio para los usuarios
 type UsersController interface {
-	UserList(c echo.Context) error
+	UsersList(c echo.Context) error
 }
 
 type usersController struct {
@@ -23,7 +23,7 @@ func NewUsersController(repo repositories.UsersRepository) UsersController {
 	return usersController{repo: repo}
 }
 
-func (ctrl usersController) UserList(c echo.Context) error {
+func (ctrl usersController) UsersList(c echo.Context) error {
 	if _, ok := auth.IsAuthenticated(c); ok {
 		users, err := ctrl.repo.All()
 		if err != nil {

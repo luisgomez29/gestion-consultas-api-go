@@ -36,4 +36,3 @@ func Load(key string) string {
 
 	return val
 }
-

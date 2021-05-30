@@ -11,17 +11,19 @@ import (
 
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
+	"github.com/luisgomez29/gestion-consultas-api/api/utils"
 )
 
 // jwtSecretKet es la clave para firmar los tokens
-var jwtSecretKet = []byte(config.Load("JWT_ACCESS_SECRET"))
+var jwtSecretKet = []byte(config.Load("JWT_ACCESS_SECRET_KEY"))
 
 // GenerateToken genera el token de acceso
 func GenerateToken(username string) (string, error) {
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": username,
-		"exp":      time.Now().Add(time.Hour * 1).Unix(),
 		"type":     "access_token",
+		"iat":      time.Now().Unix(),
+		"exp":      time.Now().Add(time.Hour * utils.Hours(config.Load("JWT_ACCESS_TOKEN_EXPIRATION_DAYS"))).Unix(),
 	}).SignedString(jwtSecretKet)
 
 	if err != nil {

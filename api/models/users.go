@@ -14,22 +14,47 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/utils"
 )
 
+type (
+	UserRole               int
+	UserIdentificationType int
+)
+
 const (
-	// UserAdmin usuario con rol administrador
-	UserAdmin = "ADMIN"
+	// UserAdmin usuario con rol administrador (ADMIN)
+	UserAdmin UserRole = iota
 
-	// UserDoctor usuario con rol doctor
-	UserDoctor = "DOC"
+	// UserDoctor usuario con rol doctor (DOC)
+	UserDoctor
 
-	// UserDefault usuario paciente
-	UserDefault = "USR"
+	// UserDefault usuario paciente (USR)
+	UserDefault
+)
 
+func (u UserRole) String() string {
+	val := [...]string{"ADMIN", "DOC", "USR"}
+
+	if u < UserAdmin || u > UserDefault {
+		return ""
+	}
+	return val[u]
+}
+
+const (
 	// IdentificationTypeCC tipo de identificación cedula de ciudadanía (CC)
-	IdentificationTypeCC = "CC"
+	IdentificationTypeCC UserIdentificationType = iota
 
 	// IdentificationTypeCE tipo de identificación cedula de extranjería (CE)
-	IdentificationTypeCE = "CE"
+	IdentificationTypeCE
 )
+
+func (u UserIdentificationType) String() string {
+	val := [...]string{"CC", "CE"}
+
+	if u < IdentificationTypeCC || u > IdentificationTypeCE {
+		return ""
+	}
+	return val[u]
+}
 
 // User representa la tabla users en la DB
 type User struct {

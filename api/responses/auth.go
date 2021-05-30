@@ -25,7 +25,7 @@ var (
 
 	identificationTypeRule = []validation.Rule{
 		validation.Required.Error("el tipo de identificación es requerido"),
-		validation.In(models.IdentificationTypeCC, models.IdentificationTypeCE).Error(
+		validation.In(models.IdentificationTypeCC.String(), models.IdentificationTypeCE.String()).Error(
 			fmt.Sprintf(
 				"el tipo de identificación debe ser %s o %s",
 				models.IdentificationTypeCC, models.IdentificationTypeCE,

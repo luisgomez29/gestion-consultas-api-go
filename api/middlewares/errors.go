@@ -30,6 +30,5 @@ func buildErrorResponse(err error) error {
 	if vErr, ok := err.(validation.Errors); ok {
 		return responses.InvalidInput(vErr)
 	}
-	return err
-	//return InternalServerError("")
+	return responses.InternalServerError("")
 }

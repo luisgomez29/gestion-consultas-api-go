@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"log"
 	"regexp"
+	"strconv"
 	"time"
 )
 
@@ -20,4 +22,13 @@ type Model struct {
 	ID        uint      `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+//Hours convierte el número de dias a horas
+func Hours(days string) time.Duration {
+	d, err := strconv.Atoi(days)
+	if err != nil {
+		log.Printf("error al convertir configuraciones a tipo int %v", err)
+	}
+	return time.Duration(24 * d)
 }

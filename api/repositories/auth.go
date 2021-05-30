@@ -38,7 +38,7 @@ func (db authRepository) SignUp(res *responses.SignUpResponse) (*models.User, er
 		return nil, err
 	}
 
-	user.Role = models.UserDefault
+	user.Role = models.UserAdmin.String()
 	user.IsActive = true
 
 	err := db.conn.QueryRow(

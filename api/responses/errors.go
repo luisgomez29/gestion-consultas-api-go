@@ -13,6 +13,9 @@ type DatabaseValidationError interface {
 	// ValidatePgError verifica el error de la base de datos.
 	// Se debe usar para verificar los errores de unicidad y otros de los campos.
 	ValidatePgError(err error) error
+
+	// NotFound verifica si el error es de tipo pgx.ErrNoRows
+	NotFound(err error, msg string) error
 }
 
 // InvalidInput crea un objeto JSON con la clave errors y como valor los errores de la validación de las

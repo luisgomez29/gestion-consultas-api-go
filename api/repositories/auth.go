@@ -38,7 +38,7 @@ func (db authRepository) SignUp(res *responses.SignUpResponse) (*models.User, er
 		return nil, err
 	}
 
-	user.Role = models.UserAdmin.String()
+	user.Role = models.UserDefault.String()
 	user.IsActive = true
 
 	err := db.conn.QueryRow(
@@ -61,8 +61,9 @@ func (db authRepository) Login(res *responses.LoginResponse) (*models.User, erro
 
 	user := new(models.User)
 	err := pgxscan.Get(context.Background(), db.conn, user, query, &res.Username)
+
 	if err != nil {
-		return nil, user.ValidatePgError(err)
+		return nil, user.NotFound(err, "usuario o contraseña incorrectos")
 	}
 	return user, nil
 }

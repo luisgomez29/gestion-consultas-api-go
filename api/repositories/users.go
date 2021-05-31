@@ -12,7 +12,7 @@ import (
 // UsersRepository encapsula la lógica para acceder a los usuarios desde la base de datos
 type UsersRepository interface {
 	All() ([]*models.User, error)
-	FindById(id uint) (*models.User, error)
+	FindByUsername(username string) (*models.User, error)
 	Create(u *models.User) (*models.User, error)
 	Update(id uint, u *models.User) (*models.User, error)
 	Delete(id uint) (uint, error)
@@ -41,8 +41,19 @@ func (db usersRepository) All() ([]*models.User, error) {
 	return users, nil
 }
 
-func (db usersRepository) FindById(id uint) (*models.User, error) {
-	panic("implement me")
+func (db usersRepository) FindByUsername(username string) (*models.User, error) {
+	query := `
+		SELECT id, role, first_name, last_name, identification_type, identification_number, username, email, phone,
+		picture, city, neighborhood, address, is_active, is_staff, is_superuser, last_login, created_at, updated_at
+		FROM users WHERE username = $1;`
+
+	user := new(models.User)
+	err := pgxscan.Get(context.Background(), db.conn, user, query, &username)
+
+	if err != nil {
+		return nil, user.NotFound(err, "usuario no encontrado")
+	}
+	return user, nil
 }
 
 func (db usersRepository) Create(u *models.User) (*models.User, error) {

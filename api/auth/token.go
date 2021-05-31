@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
+	"github.com/luisgomez29/gestion-consultas-api/api/repositories"
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
 	"github.com/luisgomez29/gestion-consultas-api/api/utils"
 )
@@ -46,7 +47,7 @@ func VerifyToken(r *http.Request) (*jwt.Token, error) {
 			vErr := err.(*jwt.ValidationError)
 			switch vErr.Errors {
 			case jwt.ValidationErrorMalformed:
-				return nil, responses.BadRequest("Token con formato incorrecto")
+				return nil, responses.BadRequest("token faltante o tiene un formato incorrecto")
 			case jwt.ValidationErrorExpired:
 				return nil, responses.Unauthorized("su token a expirado")
 			case jwt.ValidationErrorSignatureInvalid:
@@ -80,7 +81,9 @@ func ExtractToken(r *http.Request) string {
 func TokenPayload(token *jwt.Token) (*AccessDetails, error) {
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
-		return &AccessDetails{Username: claims["username"].(string)}, nil
+		userRepo := repositories.NewUsersRepository(DB)
+		user, _ := userRepo.FindByUsername(claims["username"].(string))
+		return &AccessDetails{User: user}, nil
 	}
 	return nil, errors.New("no se pudo obtener los valores del token")
 }

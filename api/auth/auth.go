@@ -4,35 +4,40 @@ package auth
 import (
 	"errors"
 
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
 )
 
-// AccessDetails representa el usuario que ha iniciado sesión
-type AccessDetails struct {
-	TokenUuid string
-	Username  string
-}
+var DB *pgxpool.Pool
 
-// JWTResponse es la respuesta cuando el usuario inicia sesión
-type JWTResponse struct {
-	Token        string `json:"token"`
-	RefreshToken string `json:"refresh_token"`
-	*models.User `json:"user"`
-}
+type (
+	// AccessDetails representa el usuario que ha iniciado sesión
+	AccessDetails struct {
+		TokenUuid string
+		User      *models.User
+	}
 
-type AccessToken struct {
-	Uuid      string
-	Token     string
-	ExpiresAt int64
-}
+	// JWTResponse es la respuesta cuando el usuario inicia sesión o se registra
+	JWTResponse struct {
+		Token        string       `json:"token"`
+		RefreshToken string       `json:"refresh_token"`
+		User         *models.User `json:"user"`
+	}
 
-type RefreshToken struct {
-	Uuid      string
-	Token     string
-	ExpiresAt int64
-}
+	AccessToken struct {
+		Uuid      string
+		Token     string
+		ExpiresAt int64
+	}
+
+	RefreshToken struct {
+		Uuid      string
+		Token     string
+		ExpiresAt int64
+	}
+)
 
 // IsAuthenticated verifica si el usuario ha iniciado sesión.
 // Si el usuario ha iniciado sesión retorna AccessDetails y true.

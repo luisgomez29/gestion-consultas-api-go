@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
+	"github.com/luisgomez29/gestion-consultas-api/api/auth"
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
 	ctrl "github.com/luisgomez29/gestion-consultas-api/api/controllers"
 	"github.com/luisgomez29/gestion-consultas-api/api/database"
@@ -28,6 +29,9 @@ func main() {
 		middleware.Secure(),
 		middlewares.ErrorHandler,
 	)
+
+	// Auth DB
+	auth.DB = db
 
 	// Routes
 	setupRoutes(db, e)

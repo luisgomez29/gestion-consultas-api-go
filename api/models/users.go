@@ -78,11 +78,14 @@ type User struct {
 	LastLogin            *time.Time `json:"last_login"`
 }
 
-func (*User) ValidatePgError(err error) error {
+func (*User) NotFound(err error, msg string) error {
 	if errors.Is(err, pgx.ErrNoRows) {
-		return echo.NewHTTPError(http.StatusBadRequest, "usuario o contraseña incorrectos")
+		return echo.NewHTTPError(http.StatusOK, msg)
 	}
+	return err
+}
 
+func (*User) ValidatePgError(err error) error {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
 		if pgErr.Code == pgerrcode.UniqueViolation {

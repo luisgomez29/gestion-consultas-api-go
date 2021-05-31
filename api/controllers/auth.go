@@ -39,7 +39,17 @@ func (ctrl authController) SignUp(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusCreated, user)
+
+	token, err := auth.GenerateToken(user.Username)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusCreated, auth.JWTResponse{
+		Token: token,
+		User:  user,
+	})
 }
 
 func (ctrl authController) Login(c echo.Context) error {

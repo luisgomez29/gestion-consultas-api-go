@@ -16,6 +16,7 @@ func AuthHandlers(g *echo.Group, ctrl controllers.AuthController) {
 
 // UsersHandlers establece las rutas para models.User
 func UsersHandlers(g *echo.Group, ctrl controllers.UsersController) {
-	g.Use(middlewares.Authentication(false))
-	g.GET("/users", ctrl.UsersList)
+	//g.Use(middlewares.Authentication(false))
+	g.GET("/users", ctrl.UsersList, middlewares.Authentication(false))
+	g.GET("/users/:username", ctrl.UsersRetrieve, middlewares.Authentication(false))
 }

@@ -27,8 +27,11 @@ func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 
 // buildErrorResponse construye una respuesta de error a partir de un error.
 func buildErrorResponse(err error) error {
-	if vErr, ok := err.(validation.Errors); ok {
-		return responses.InvalidInput(vErr)
+	switch err.(type) {
+	case validation.Errors:
+		return responses.InvalidInput(err.(validation.Errors))
+	case *echo.HTTPError:
+		return err
 	}
 	return responses.InternalServerError("")
 }

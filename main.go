@@ -46,7 +46,7 @@ func setupRoutes(db *pgxpool.Pool, e *echo.Echo) {
 	v1 := api.Group("/v1")
 
 	// Auth
-	routes.AuthHandlers(v1, ctrl.NewAuthController(repo.NewAuthRepository(db)))
+	routes.AuthHandlers(v1, ctrl.NewAccountsController(repo.NewAccountsRepository(db)))
 
 	// Users
 	routes.UsersHandlers(v1, ctrl.NewUsersController(repo.NewUsersRepository(db)))

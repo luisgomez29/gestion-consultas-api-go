@@ -11,22 +11,22 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
 )
 
-// AuthRepository encapsula la lógica para acceder a los usuarios desde la base de datos
-type AuthRepository interface {
+// AccountsRepository encapsula la lógica para acceder a los usuarios desde la base de datos
+type AccountsRepository interface {
 	SignUp(res *responses.SignUpResponse) (*models.User, error)
 	Login(res *responses.LoginResponse) (*models.User, error)
 }
 
-type authRepository struct {
+type accountsRepository struct {
 	conn *pgxpool.Pool
 }
 
-// NewAuthRepository crea un nuevo repositorio de autenticación
-func NewAuthRepository(db *pgxpool.Pool) AuthRepository {
-	return authRepository{conn: db}
+// NewAccountsRepository crea un nuevo repositorio de autenticación
+func NewAccountsRepository(db *pgxpool.Pool) AccountsRepository {
+	return accountsRepository{conn: db}
 }
 
-func (db authRepository) SignUp(res *responses.SignUpResponse) (*models.User, error) {
+func (r accountsRepository) SignUp(res *responses.SignUpResponse) (*models.User, error) {
 	query := `
 		INSERT INTO users(role, first_name, last_name, identification_type, identification_number, username, email,
 		password, phone, city, neighborhood, address, is_active, is_staff, is_superuser)
@@ -41,7 +41,7 @@ func (db authRepository) SignUp(res *responses.SignUpResponse) (*models.User, er
 	user.Role = models.UserDefault.String()
 	user.IsActive = true
 
-	err := db.conn.QueryRow(
+	err := r.conn.QueryRow(
 		context.Background(), query, user.Role, user.FirstName, user.LastName, user.IdentificationType,
 		user.IdentificationNumber, user.Username, user.Email, user.Password, user.Phone, user.City,
 		user.Neighborhood, user.Address, user.IsActive, user.IsStaff, user.IsSuperuser,
@@ -53,14 +53,14 @@ func (db authRepository) SignUp(res *responses.SignUpResponse) (*models.User, er
 	return responses.UserResponse(user), nil
 }
 
-func (db authRepository) Login(res *responses.LoginResponse) (*models.User, error) {
+func (r accountsRepository) Login(res *responses.LoginResponse) (*models.User, error) {
 	query := `
 		SELECT id, role, first_name, last_name, identification_type, identification_number, username, email, password,
 		phone, picture, city, neighborhood, address, is_active, is_staff, is_superuser, last_login, created_at, updated_at
 		FROM users WHERE username = $1;`
 
 	user := new(models.User)
-	err := pgxscan.Get(context.Background(), db.conn, user, query, &res.Username)
+	err := pgxscan.Get(context.Background(), r.conn, user, query, &res.Username)
 
 	if err != nil {
 		return nil, user.NotFound(err, "usuario o contraseña incorrectos")

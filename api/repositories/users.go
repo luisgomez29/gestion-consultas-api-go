@@ -27,28 +27,28 @@ func NewUsersRepository(db *pgxpool.Pool) UsersRepository {
 	return usersRepository{conn: db}
 }
 
-func (db usersRepository) All() ([]*models.User, error) {
+func (r usersRepository) All() ([]*models.User, error) {
 	query := `
 		SELECT id, role, first_name, last_name, identification_type, identification_number, username, email, phone,
 		picture, city, neighborhood, address, is_active, is_staff, is_superuser, last_login, created_at, updated_at
 		FROM users;`
 
 	var users []*models.User
-	err := pgxscan.Select(context.Background(), db.conn, &users, query)
+	err := pgxscan.Select(context.Background(), r.conn, &users, query)
 	if err != nil {
 		return nil, err
 	}
 	return users, nil
 }
 
-func (db usersRepository) FindByUsername(username string) (*models.User, error) {
+func (r usersRepository) FindByUsername(username string) (*models.User, error) {
 	query := `
 		SELECT id, role, first_name, last_name, identification_type, identification_number, username, email, phone,
 		picture, city, neighborhood, address, is_active, is_staff, is_superuser, last_login, created_at, updated_at
 		FROM users WHERE username = $1;`
 
 	user := new(models.User)
-	err := pgxscan.Get(context.Background(), db.conn, user, query, &username)
+	err := pgxscan.Get(context.Background(), r.conn, user, query, &username)
 
 	if err != nil {
 		return nil, user.NotFound(err, "usuario no encontrado")
@@ -56,7 +56,7 @@ func (db usersRepository) FindByUsername(username string) (*models.User, error) 
 	return user, nil
 }
 
-func (db usersRepository) Create(u *models.User) (*models.User, error) {
+func (r usersRepository) Create(u *models.User) (*models.User, error) {
 	//query := `
 	//	INSERT INTO users(role, first_name, last_name, identification_type, identification_number, username, email,
 	//    password, phone, picture, city, neighborhood, address, is_active, is_staff, last_login)
@@ -64,10 +64,10 @@ func (db usersRepository) Create(u *models.User) (*models.User, error) {
 	panic("implement me")
 }
 
-func (db usersRepository) Update(u uint, user *models.User) (*models.User, error) {
+func (r usersRepository) Update(u uint, user *models.User) (*models.User, error) {
 	panic("implement me")
 }
 
-func (db usersRepository) Delete(u uint) (uint, error) {
+func (r usersRepository) Delete(u uint) (uint, error) {
 	panic("implement me")
 }

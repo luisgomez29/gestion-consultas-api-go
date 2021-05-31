@@ -19,32 +19,32 @@ type UsersController interface {
 }
 
 type usersController struct {
-	repo repositories.UsersRepository
+	usersRepo repositories.UsersRepository
 }
 
 // NewUsersController crea un nuevo controlador de usuarios
 func NewUsersController(repo repositories.UsersRepository) UsersController {
-	return usersController{repo: repo}
+	return usersController{usersRepo: repo}
 }
 
-func (ctrl usersController) UsersList(c echo.Context) error {
+func (ct usersController) UsersList(c echo.Context) error {
 	if _, ok := auth.IsAuthenticated(c); ok {
-		users, err := ctrl.repo.All()
+		users, err := ct.usersRepo.All()
 		if err != nil {
 			return err
 		}
 		return c.JSON(http.StatusOK, users)
 	}
 	return echo.NewHTTPError(http.StatusBadRequest, "INICIE SESSION")
-	//users, err := ctrl.repo.All()
+	//users, err := ct.usersRepo.All()
 	//if err != nil {
 	//	return err
 	//}
 	//return c.JSON(http.StatusOK, users)
 }
 
-func (ctrl usersController) UsersRetrieve(c echo.Context) error {
-	user, err := ctrl.repo.FindByUsername(c.Param("username"))
+func (ct usersController) UsersRetrieve(c echo.Context) error {
+	user, err := ct.usersRepo.FindByUsername(c.Param("username"))
 
 	u, ok := auth.IsAuthenticated(c)
 	if ok {

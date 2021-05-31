@@ -10,22 +10,22 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
 )
 
-// AuthController encapsula la lógica de negocio de autenticación
-type AuthController interface {
+// AccountsController encapsula la lógica de negocio de autenticación
+type AccountsController interface {
 	SignUp(c echo.Context) error
 	Login(c echo.Context) error
 }
 
-type authController struct {
-	repo repositories.AuthRepository
+type accountsController struct {
+	accountsRepo repositories.AccountsRepository
 }
 
-// NewAuthController crea un nuevo controlador de autenticación
-func NewAuthController(repo repositories.AuthRepository) AuthController {
-	return authController{repo: repo}
+// NewAccountsController crea un nuevo controlador de autenticación
+func NewAccountsController(repo repositories.AccountsRepository) AccountsController {
+	return accountsController{accountsRepo: repo}
 }
 
-func (ctrl authController) SignUp(c echo.Context) error {
+func (ct accountsController) SignUp(c echo.Context) error {
 	input := new(responses.SignUpResponse)
 	if err := c.Bind(input); err != nil {
 		return responses.BadRequest("")
@@ -35,7 +35,7 @@ func (ctrl authController) SignUp(c echo.Context) error {
 		return err
 	}
 
-	user, err := ctrl.repo.SignUp(input)
+	user, err := ct.accountsRepo.SignUp(input)
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func (ctrl authController) SignUp(c echo.Context) error {
 	})
 }
 
-func (ctrl authController) Login(c echo.Context) error {
+func (ct accountsController) Login(c echo.Context) error {
 	input := new(responses.LoginResponse)
 	if err := c.Bind(input); err != nil {
 		return responses.BadRequest("")
@@ -62,7 +62,7 @@ func (ctrl authController) Login(c echo.Context) error {
 		return err
 	}
 
-	user, err := ctrl.repo.Login(input)
+	user, err := ct.accountsRepo.Login(input)
 	if err != nil {
 		return err
 	}

@@ -9,7 +9,7 @@ import (
 )
 
 // AuthHandlers establece las rutas para la autenticación
-func AuthHandlers(g *echo.Group, ctrl controllers.AuthController) {
+func AuthHandlers(g *echo.Group, ctrl controllers.AccountsController) {
 	g.POST("/signup", ctrl.SignUp)
 	g.POST("/login", ctrl.Login)
 }

@@ -4,13 +4,10 @@ package auth
 import (
 	"errors"
 
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
 )
-
-var DB *pgxpool.Pool
 
 type (
 	// AccessDetails representa el usuario que ha iniciado sesión

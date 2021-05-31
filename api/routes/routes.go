@@ -8,8 +8,12 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/middlewares"
 )
 
-// AuthHandlers establece las rutas para la autenticación
-func AuthHandlers(g *echo.Group, ctrl controllers.AccountsController) {
+//func AuthHandlers(g *echo.Group, ctrl controllers.AuthController) {
+//	g.GET("/test", ctrl.Prueba, middlewares.Authentication(false))
+//}
+
+// AccountsHandlers establece las rutas para la autenticación y gestión de cuenta
+func AccountsHandlers(g *echo.Group, ctrl controllers.AccountsController) {
 	g.POST("/signup", ctrl.SignUp)
 	g.POST("/login", ctrl.Login)
 }

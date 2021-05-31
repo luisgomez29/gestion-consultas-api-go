@@ -10,7 +10,6 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
-	"github.com/luisgomez29/gestion-consultas-api/api/repositories"
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
 	"github.com/luisgomez29/gestion-consultas-api/api/utils"
 )
@@ -77,13 +76,11 @@ func ExtractToken(r *http.Request) string {
 	return ""
 }
 
-// TokenPayload obtiene el payload del token y retorna un AccessDetails.
-func TokenPayload(token *jwt.Token) (*AccessDetails, error) {
+// TokenPayload obtiene el payload del token
+func TokenPayload(token *jwt.Token) (jwt.MapClaims, error) {
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
-		userRepo := repositories.NewUsersRepository(DB)
-		user, _ := userRepo.FindByUsername(claims["username"].(string))
-		return &AccessDetails{User: user}, nil
+		return claims, nil
 	}
-	return nil, errors.New("no se pudo obtener los valores del token")
+	return nil, errors.New("token claims could not be obtained")
 }

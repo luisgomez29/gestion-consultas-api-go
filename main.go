@@ -30,9 +30,6 @@ func main() {
 		middlewares.ErrorHandler,
 	)
 
-	// Auth
-	//ctrl.NewAuthController(repo.NewAuthRepository(db))
-
 	// Routes
 	setupRoutes(db, e)
 
@@ -45,16 +42,17 @@ func setupRoutes(db *pgxpool.Pool, e *echo.Echo) {
 	api := e.Group("/api")
 	v1 := api.Group("/v1")
 
+	// Repositorios
 	usersRepo := repo.NewUsersRepository(db)
 	authRepo := repo.NewAuthRepository(db, usersRepo)
 	accountsRepo := repo.NewAccountsRepository(db)
 
-	// Auth
-	ath := auth.NewAuth(authRepo)
+	// Servicio de autenticación
+	authn := auth.NewAuth(authRepo)
 
 	// Accounts
-	routes.AccountsHandlers(v1, ctrl.NewAccountsController(accountsRepo, ath))
+	routes.AccountsHandlers(v1, ctrl.NewAccountsController(authn, accountsRepo))
 
 	// Users
-	routes.UsersHandlers(v1, ctrl.NewUsersController(usersRepo, ath))
+	routes.UsersHandlers(v1, ctrl.NewUsersController(authn, usersRepo))
 }

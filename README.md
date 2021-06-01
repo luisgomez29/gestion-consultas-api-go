@@ -54,6 +54,10 @@ API REST para la gestión de consultas con GO.
     go run main.go
    ```
 
+## Esquema
+
+Ver [Migraciones](https://github.com/luisgomez29/gestion-consultas-api/tree/main/migrations)
+
 ## Endpoints
 
 La API REST proporciona las siguientes rutas:

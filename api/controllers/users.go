@@ -19,13 +19,13 @@ type UsersController interface {
 }
 
 type usersController struct {
-	usersRepo repo.UsersRepository
 	auth      auth.Auth
+	usersRepo repo.UsersRepository
 }
 
 // NewUsersController crea un nuevo controlador de usuarios
-func NewUsersController(u repo.UsersRepository, auth auth.Auth) UsersController {
-	return usersController{usersRepo: u, auth: auth}
+func NewUsersController(at auth.Auth, u repo.UsersRepository) UsersController {
+	return usersController{auth: at, usersRepo: u}
 }
 
 func (ct usersController) UsersList(c echo.Context) error {

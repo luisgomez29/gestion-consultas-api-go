@@ -17,13 +17,13 @@ type AccountsController interface {
 }
 
 type accountsController struct {
-	accountsRepo repo.AccountsRepository
 	auth         auth.Auth
+	accountsRepo repo.AccountsRepository
 }
 
 // NewAccountsController crea un nuevo controlador de autenticación
-func NewAccountsController(a repo.AccountsRepository, auth auth.Auth) AccountsController {
-	return accountsController{accountsRepo: a, auth: auth}
+func NewAccountsController(at auth.Auth, a repo.AccountsRepository) AccountsController {
+	return accountsController{auth: at, accountsRepo: a}
 }
 
 func (ct accountsController) SignUp(c echo.Context) error {

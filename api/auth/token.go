@@ -1,21 +1,27 @@
 package auth
 
 import (
-	"errors"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
-	"github.com/luisgomez29/gestion-consultas-api/api/responses"
 	"github.com/luisgomez29/gestion-consultas-api/api/utils"
 )
 
+// Tipo de autorización
+const authorizationTypeBearer = "Bearer"
+
 // jwtSecretKet es la clave para firmar los tokens
 var jwtSecretKet = []byte(config.Load("JWT_ACCESS_SECRET_KEY"))
+
+// Errores
+var (
+	ErrJWTMissing = echo.NewHTTPError(http.StatusBadRequest, "token faltante o tiene un formato incorrecto")
+	ErrJWTInvalid = echo.NewHTTPError(http.StatusUnauthorized, "token inválido o expirado")
+)
 
 // GenerateToken genera el token de acceso
 func GenerateToken(username string) (string, error) {
@@ -34,8 +40,7 @@ func GenerateToken(username string) (string, error) {
 }
 
 // VerifyToken verifica que el token sea valido
-func VerifyToken(r *http.Request) (*jwt.Token, error) {
-	tokenString := ExtractToken(r)
+func VerifyToken(tokenString string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecretKet, nil
 	})
@@ -46,41 +51,29 @@ func VerifyToken(r *http.Request) (*jwt.Token, error) {
 			vErr := err.(*jwt.ValidationError)
 			switch vErr.Errors {
 			case jwt.ValidationErrorMalformed:
-				return nil, responses.BadRequest("token faltante o tiene un formato incorrecto")
-			case jwt.ValidationErrorExpired:
-				return nil, responses.Unauthorized("su token a expirado")
-			case jwt.ValidationErrorSignatureInvalid:
-				return nil, responses.Unauthorized("la firma del token no coincide")
+				return nil, ErrJWTMissing
+			case jwt.ValidationErrorExpired, jwt.ValidationErrorSignatureInvalid:
+				return nil, ErrJWTInvalid
 			default:
-				return nil, responses.BadRequest("su token no es valido")
+				return nil, ErrJWTMissing
 			}
 		default:
-			return nil, responses.BadRequest("su token no es valido")
+			return nil, ErrJWTMissing
 		}
 	}
 
-	if _, ok := token.Claims.(jwt.MapClaims); !ok && !token.Valid {
-		return nil, err
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, err
 	}
 
-	return token, nil
+	return nil, ErrJWTMissing
 }
 
 // ExtractToken obtiene el token del header de la solicitud
-func ExtractToken(r *http.Request) string {
-	auth := r.Header.Get("Authorization")
-	strArr := strings.Split(auth, " ")
-	if len(strArr) == 2 {
-		return strArr[1]
+func ExtractToken(authzHeader string) (string, error) {
+	l := len(authorizationTypeBearer)
+	if len(authzHeader) > l+1 && authzHeader[:l] == authorizationTypeBearer {
+		return authzHeader[l+1:], nil
 	}
-	return ""
-}
-
-// TokenPayload obtiene el payload del token
-func TokenPayload(token *jwt.Token) (jwt.MapClaims, error) {
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if ok && token.Valid {
-		return claims, nil
-	}
-	return nil, errors.New("token claims could not be obtained")
+	return "", ErrJWTMissing
 }

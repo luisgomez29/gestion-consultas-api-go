@@ -3,13 +3,12 @@ package auth
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
-	"github.com/luisgomez29/gestion-consultas-api/api/repositories"
+	repo "github.com/luisgomez29/gestion-consultas-api/api/repositories"
 )
 
 type Auth interface {
@@ -19,7 +18,7 @@ type Auth interface {
 
 type (
 	auth struct {
-		authRepo repositories.AuthRepository
+		authRepo repo.AuthRepository
 	}
 
 	// AccessDetails representa el usuario que ha iniciado sesión
@@ -35,21 +34,21 @@ type (
 		User         *models.User `json:"user"`
 	}
 
-	AccessToken struct {
-		Uuid      string
-		Token     string
-		ExpiresAt int64
-	}
-
-	RefreshToken struct {
-		Uuid      string
-		Token     string
-		ExpiresAt int64
-	}
+	//AccessToken struct {
+	//	Uuid      string
+	//	Token     string
+	//	ExpiresAt int64
+	//}
+	//
+	//RefreshToken struct {
+	//	Uuid      string
+	//	Token     string
+	//	ExpiresAt int64
+	//}
 )
 
-func NewAuth(repo repositories.AuthRepository) Auth {
-	return auth{authRepo: repo}
+func NewAuth(at repo.AuthRepository) Auth {
+	return auth{authRepo: at}
 }
 
 // IsAuthenticated verifica si el usuario ha iniciado sesión.
@@ -59,14 +58,9 @@ func (r auth) IsAuthenticated(c echo.Context) (*AccessDetails, bool) {
 	if user == nil {
 		return &AccessDetails{}, false
 	}
+
 	claims := user.(jwt.MapClaims)
 	username := claims["username"].(string)
-	fmt.Printf("USERNAME %#v\n\n", username)
-	if username == "" {
-		//return user.(*AccessDetails), true
-		return &AccessDetails{}, false
-	}
-
 	u := r.authRepo.User(username)
 	return &AccessDetails{User: u}, true
 }

@@ -1,8 +1,6 @@
 package middlewares
 
 import (
-	"log"
-
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/auth"
@@ -19,17 +17,19 @@ import (
 func Authentication(isRequired bool) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			header := c.Request().Header.Get("Authorization")
-			if isRequired || header != "" {
-				token, err := auth.VerifyToken(c.Request())
+			authzHeader := c.Request().Header.Get(echo.HeaderAuthorization)
+			if isRequired || authzHeader != "" {
+
+				tokenString, err := auth.ExtractToken(authzHeader)
 				if err != nil {
 					return err
 				}
-				claims, err := auth.TokenPayload(token)
-				log.Printf("CLAIMS %#v\n", claims)
+
+				claims, err := auth.VerifyToken(tokenString)
 				if err != nil {
 					return err
 				}
+
 				c.Set("user", claims)
 			}
 			return next(c)

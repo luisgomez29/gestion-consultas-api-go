@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
+	"github.com/luisgomez29/gestion-consultas-api/api/auth"
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
 	ctrl "github.com/luisgomez29/gestion-consultas-api/api/controllers"
 	"github.com/luisgomez29/gestion-consultas-api/api/database"
@@ -44,12 +45,16 @@ func setupRoutes(db *pgxpool.Pool, e *echo.Echo) {
 	api := e.Group("/api")
 	v1 := api.Group("/v1")
 
+	usersRepo := repo.NewUsersRepository(db)
+	authRepo := repo.NewAuthRepository(db, usersRepo)
+	accountsRepo := repo.NewAccountsRepository(db)
+
 	// Auth
-	repo.NewAuthRepository(db)
+	ath := auth.NewAuth(authRepo)
 
 	// Accounts
-	routes.AccountsHandlers(v1, ctrl.NewAccountsController(repo.NewAccountsRepository(db)))
+	routes.AccountsHandlers(v1, ctrl.NewAccountsController(accountsRepo, ath))
 
 	// Users
-	routes.UsersHandlers(v1, ctrl.NewUsersController(repo.NewUsersRepository(db)))
+	routes.UsersHandlers(v1, ctrl.NewUsersController(usersRepo, ath))
 }

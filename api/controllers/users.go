@@ -8,7 +8,7 @@ import (
 
 	"github.com/luisgomez29/gestion-consultas-api/api/auth"
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
-	"github.com/luisgomez29/gestion-consultas-api/api/repositories"
+	repo "github.com/luisgomez29/gestion-consultas-api/api/repositories"
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
 )
 
@@ -19,16 +19,17 @@ type UsersController interface {
 }
 
 type usersController struct {
-	usersRepo repositories.UsersRepository
+	usersRepo repo.UsersRepository
+	auth      auth.Auth
 }
 
 // NewUsersController crea un nuevo controlador de usuarios
-func NewUsersController(repo repositories.UsersRepository) UsersController {
-	return usersController{usersRepo: repo}
+func NewUsersController(u repo.UsersRepository, auth auth.Auth) UsersController {
+	return usersController{usersRepo: u, auth: auth}
 }
 
 func (ct usersController) UsersList(c echo.Context) error {
-	if _, ok := auth.IsAuthenticated(c); ok {
+	if _, ok := ct.auth.IsAuthenticated(c); ok {
 		users, err := ct.usersRepo.All()
 		if err != nil {
 			return err
@@ -46,7 +47,7 @@ func (ct usersController) UsersList(c echo.Context) error {
 func (ct usersController) UsersRetrieve(c echo.Context) error {
 	user, err := ct.usersRepo.FindByUsername(c.Param("username"))
 
-	u, ok := auth.IsAuthenticated(c)
+	u, ok := ct.auth.IsAuthenticated(c)
 	if ok {
 		fmt.Printf("USER AUTH %#v\n", u)
 	}

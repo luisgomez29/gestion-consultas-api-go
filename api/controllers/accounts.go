@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/auth"
-	"github.com/luisgomez29/gestion-consultas-api/api/repositories"
+	repo "github.com/luisgomez29/gestion-consultas-api/api/repositories"
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
 )
 
@@ -17,12 +17,13 @@ type AccountsController interface {
 }
 
 type accountsController struct {
-	accountsRepo repositories.AccountsRepository
+	accountsRepo repo.AccountsRepository
+	auth         auth.Auth
 }
 
 // NewAccountsController crea un nuevo controlador de autenticación
-func NewAccountsController(repo repositories.AccountsRepository) AccountsController {
-	return accountsController{accountsRepo: repo}
+func NewAccountsController(a repo.AccountsRepository, auth auth.Auth) AccountsController {
+	return accountsController{accountsRepo: a, auth: auth}
 }
 
 func (ct accountsController) SignUp(c echo.Context) error {
@@ -67,12 +68,11 @@ func (ct accountsController) Login(c echo.Context) error {
 		return err
 	}
 
-	if err := auth.VerifyPassword(user.Password, input.Password); err != nil {
+	if err := ct.auth.VerifyPassword(user.Password, input.Password); err != nil {
 		return responses.Unauthorized("la contraseña ingresada es incorrecta")
 	}
 
 	token, err := auth.GenerateToken(user.Username)
-
 	if err != nil {
 		return err
 	}

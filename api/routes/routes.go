@@ -8,10 +8,6 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/middlewares"
 )
 
-//func AuthHandlers(g *echo.Group, ctrl controllers.AuthController) {
-//	g.GET("/test", ctrl.Prueba, middlewares.Authentication(false))
-//}
-
 // AccountsHandlers establece las rutas para la autenticación y gestión de cuenta
 func AccountsHandlers(g *echo.Group, ctrl controllers.AccountsController) {
 	g.POST("/signup", ctrl.SignUp)
@@ -20,7 +16,7 @@ func AccountsHandlers(g *echo.Group, ctrl controllers.AccountsController) {
 
 // UsersHandlers establece las rutas para models.User
 func UsersHandlers(g *echo.Group, ctrl controllers.UsersController) {
-	//g.Use(middlewares.Authentication(false))
-	g.GET("/users", ctrl.UsersList, middlewares.Authentication(false))
-	g.GET("/users/:username", ctrl.UsersRetrieve, middlewares.Authentication(false))
+	g.Use(middlewares.Authentication(true))
+	g.GET("/users", ctrl.UsersList)
+	g.GET("/users/:username", ctrl.UsersRetrieve)
 }

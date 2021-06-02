@@ -1,4 +1,4 @@
-package responses
+package errors
 
 import (
 	"net/http"
@@ -6,17 +6,6 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/labstack/echo/v4"
 )
-
-// DatabaseValidationError define los métodos para verificar los errores de la base de datos
-type DatabaseValidationError interface {
-
-	// ValidatePgError verifica el error de la base de datos.
-	// Se debe usar para verificar los errores de unicidad y otros de los campos.
-	ValidatePgError(err error) error
-
-	// NotFound verifica si el error es de tipo pgx.ErrNoRows
-	NotFound(err error, msg string) error
-}
 
 // InvalidInput crea un objeto JSON con la clave errors y como valor los errores de la validación de las
 // estructuras

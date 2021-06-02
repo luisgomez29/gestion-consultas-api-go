@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
+	"github.com/luisgomez29/gestion-consultas-api/api/utils"
 )
 
 // UsersRepository encapsula la lógica para acceder a los usuarios desde la base de datos
@@ -33,9 +34,8 @@ func (r usersRepository) All() ([]*models.User, error) {
 		picture, city, neighborhood, address, is_active, is_staff, is_superuser, last_login, created_at, updated_at
 		FROM users;`
 
-	var users []*models.User
-	err := pgxscan.Select(context.Background(), r.conn, &users, query)
-	if err != nil {
+	users := []*models.User{}
+	if err := pgxscan.Select(context.Background(), r.conn, &users, query); err != nil {
 		return nil, err
 	}
 	return users, nil
@@ -48,10 +48,8 @@ func (r usersRepository) FindByUsername(username string) (*models.User, error) {
 		FROM users WHERE username = $1;`
 
 	user := new(models.User)
-	err := pgxscan.Get(context.Background(), r.conn, user, query, &username)
-
-	if err != nil {
-		return nil, user.NotFound(err, "usuario no encontrado")
+	if err := pgxscan.Get(context.Background(), r.conn, user, query, &username); err != nil {
+		return nil, utils.ValidateErrNoRows(err, "usuario no encontrado")
 	}
 	return user, nil
 }

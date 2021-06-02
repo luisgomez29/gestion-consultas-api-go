@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/auth"
+	api "github.com/luisgomez29/gestion-consultas-api/api/errors"
 	repo "github.com/luisgomez29/gestion-consultas-api/api/repositories"
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
 )
@@ -29,7 +30,7 @@ func NewAccountsController(at auth.Auth, a repo.AccountsRepository) AccountsCont
 func (ct accountsController) SignUp(c echo.Context) error {
 	input := new(responses.SignUpResponse)
 	if err := c.Bind(input); err != nil {
-		return responses.BadRequest("")
+		return api.BadRequest("")
 	}
 
 	if err := input.Validate(); err != nil {
@@ -42,7 +43,6 @@ func (ct accountsController) SignUp(c echo.Context) error {
 	}
 
 	token, err := auth.GenerateToken(user.Username)
-
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func (ct accountsController) SignUp(c echo.Context) error {
 func (ct accountsController) Login(c echo.Context) error {
 	input := new(responses.LoginResponse)
 	if err := c.Bind(input); err != nil {
-		return responses.BadRequest("")
+		return api.BadRequest("")
 	}
 
 	if err := input.Validate(); err != nil {
@@ -69,7 +69,7 @@ func (ct accountsController) Login(c echo.Context) error {
 	}
 
 	if err := ct.auth.VerifyPassword(user.Password, input.Password); err != nil {
-		return responses.Unauthorized("la contraseña ingresada es incorrecta")
+		return api.Unauthorized("la contraseña ingresada es incorrecta")
 	}
 
 	token, err := auth.GenerateToken(user.Username)

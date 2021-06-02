@@ -8,7 +8,6 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
-	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/utils"
@@ -76,13 +75,6 @@ type User struct {
 	IsStaff              bool       `json:"is_staff,omitempty"`
 	IsSuperuser          bool       `json:"is_superuser,omitempty"`
 	LastLogin            *time.Time `json:"last_login"`
-}
-
-func (*User) NotFound(err error, msg string) error {
-	if errors.Is(err, pgx.ErrNoRows) {
-		return echo.NewHTTPError(http.StatusOK, msg)
-	}
-	return err
 }
 
 func (*User) ValidatePgError(err error) error {

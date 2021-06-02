@@ -1,13 +1,14 @@
 package middlewares
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/labstack/echo/v4"
 
-	"github.com/luisgomez29/gestion-consultas-api/api/responses"
+	api "github.com/luisgomez29/gestion-consultas-api/api/errors"
 )
 
 // ErrorHandler crea un middleware que gestiona los pánicos y errores encontrados durante el procesamiento de
@@ -15,11 +16,11 @@ import (
 func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if err := next(c); err != nil {
-			res := buildErrorResponse(err)
-			if res.(*echo.HTTPError).Code == http.StatusInternalServerError {
+			buildErr := buildErrorResponse(err)
+			if buildErr.(*echo.HTTPError).Code == http.StatusInternalServerError {
 				log.Printf("encountered internal server error: %v", err)
 			}
-			return res
+			return buildErr
 		}
 		return nil
 	}
@@ -29,9 +30,24 @@ func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 func buildErrorResponse(err error) error {
 	switch err.(type) {
 	case validation.Errors:
-		return responses.InvalidInput(err.(validation.Errors))
+		return api.InvalidInput(err.(validation.Errors))
 	case *echo.HTTPError:
-		return err
+		switch err.(*echo.HTTPError).Code {
+		case http.StatusNotFound:
+			return api.NotFound("")
+		case http.StatusInternalServerError:
+			return api.InternalServerError("")
+		case http.StatusForbidden:
+			return api.Forbidden("")
+		default:
+			return err
+		}
 	}
-	return responses.InternalServerError("")
+
+	var errNoRows *api.ErrNoRows
+	if errors.As(err, &errNoRows) {
+		return echo.NewHTTPError(http.StatusNotFound, errNoRows.Error())
+	}
+
+	return api.InternalServerError("")
 }

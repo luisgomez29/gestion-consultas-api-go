@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -29,28 +28,16 @@ func NewUsersController(at auth.Auth, u repo.UsersRepository) UsersController {
 }
 
 func (ct usersController) UsersList(c echo.Context) error {
-	if _, ok := ct.auth.IsAuthenticated(c); ok {
-		users, err := ct.usersRepo.All()
-		if err != nil {
-			return err
-		}
-		return c.JSON(http.StatusOK, users)
+	users, err := ct.usersRepo.All()
+	if err != nil {
+		return err
 	}
-	return echo.NewHTTPError(http.StatusBadRequest, "INICIE SESSION")
-	//users, err := ct.usersRepo.All()
-	//if err != nil {
-	//	return err
-	//}
-	//return c.JSON(http.StatusOK, users)
+	r := map[string][]*models.User{"results": users}
+	return c.JSON(http.StatusOK, r)
 }
 
 func (ct usersController) UsersRetrieve(c echo.Context) error {
 	user, err := ct.usersRepo.FindByUsername(c.Param("username"))
-
-	u, ok := ct.auth.IsAuthenticated(c)
-	if ok {
-		fmt.Printf("USER AUTH %#v\n", u)
-	}
 	if err != nil {
 		return err
 	}

@@ -9,6 +9,7 @@ import (
 
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
+	"github.com/luisgomez29/gestion-consultas-api/api/utils"
 )
 
 // AccountsRepository encapsula la lógica para acceder a los usuarios desde la base de datos
@@ -50,7 +51,7 @@ func (r accountsRepository) SignUp(res *responses.SignUpResponse) (*models.User,
 	if err != nil {
 		return nil, user.ValidatePgError(err)
 	}
-	return responses.UserResponse(user), nil
+	return user, nil
 }
 
 func (r accountsRepository) Login(res *responses.LoginResponse) (*models.User, error) {
@@ -60,10 +61,8 @@ func (r accountsRepository) Login(res *responses.LoginResponse) (*models.User, e
 		FROM users WHERE username = $1;`
 
 	user := new(models.User)
-	err := pgxscan.Get(context.Background(), r.conn, user, query, &res.Username)
-
-	if err != nil {
-		return nil, user.NotFound(err, "usuario o contraseña incorrectos")
+	if err := pgxscan.Get(context.Background(), r.conn, user, query, &res.Username); err != nil {
+		return nil, utils.ValidateErrNoRows(err, "usuario o contraseña incorrectos")
 	}
 	return user, nil
 }

@@ -1,9 +1,21 @@
 /*
  * Author: Luis Guillermo Gómez Galeano
+ *
  * Create initial database schema.
  *
  * The created_at and updated_at fields have the default value CURRENT_TIMESTAMP
  */
+
+--
+-- TABLE CONTENT_TYPE
+--
+
+CREATE TABLE content_type
+(
+    id    SERIAL PRIMARY KEY,
+    model VARCHAR(25) NOT NULL UNIQUE
+);
+
 
 --
 -- TABLE AUTH_PERMISSION
@@ -11,9 +23,10 @@
 
 CREATE TABLE auth_permission
 (
-    id       SERIAL PRIMARY KEY,
-    name     VARCHAR(60) NOT NULL,
-    codename VARCHAR(25) NOT NULL UNIQUE
+    id           SERIAL PRIMARY KEY,
+    name         VARCHAR(100) NOT NULL,
+    content_type INTEGER      NOT NULL REFERENCES content_type (id) ON DELETE CASCADE,
+    codename     VARCHAR(60)  NOT NULL UNIQUE
 );
 
 --
@@ -23,7 +36,7 @@ CREATE TABLE auth_permission
 CREATE TABLE auth_group
 (
     id   SERIAL PRIMARY KEY,
-    name VARCHAR(40) NOT NULL
+    name VARCHAR(40) NOT NULL UNIQUE
 );
 
 
@@ -81,7 +94,7 @@ CREATE TABLE user_permissions
 (
     id            SERIAL PRIMARY KEY,
     user_id       INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    permission_id INTEGER NOT NULL REFERENCES auth_permission (id) ON DELETE CASCADE
+    permission_id INTEGER NOT NULL REFERENCES auth_permission (id) ON DELETE CASCADE UNIQUE
 );
 
 --
@@ -91,8 +104,8 @@ CREATE TABLE user_permissions
 CREATE TABLE user_groups
 (
     id       SERIAL PRIMARY KEY,
-    user_id  INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    group_id INTEGER NOT NULL REFERENCES auth_group (id) ON DELETE CASCADE
+    user_id  INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE UNIQUE,
+    group_id INTEGER NOT NULL REFERENCES auth_group (id) ON DELETE CASCADE UNIQUE
 );
 
 --

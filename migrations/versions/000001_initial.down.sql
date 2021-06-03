@@ -1,5 +1,6 @@
 /*
  * Author: Luis Guillermo Gómez Galeano
+ *
  * Delete initial database schema
  */
 
@@ -13,6 +14,7 @@
 -- DELETE TABLES
 --
 
+DROP TABLE IF EXISTS content_type CASCADE;
 DROP TABLE IF EXISTS auth_permission CASCADE;
 DROP TABLE IF EXISTS auth_group CASCADE;
 DROP TABLE IF EXISTS auth_group_permissions CASCADE;

@@ -18,22 +18,22 @@ CREATE TABLE content_type
 
 
 --
--- TABLE AUTH_PERMISSION
+-- TABLE PERMISSIONS
 --
 
-CREATE TABLE auth_permission
+CREATE TABLE permissions
 (
-    id           SERIAL PRIMARY KEY,
-    name         VARCHAR(100) NOT NULL,
-    content_type INTEGER      NOT NULL REFERENCES content_type (id) ON DELETE CASCADE,
-    codename     VARCHAR(60)  NOT NULL UNIQUE
+    id              SERIAL PRIMARY KEY,
+    name            VARCHAR(100) NOT NULL,
+    codename        VARCHAR(60)  NOT NULL UNIQUE,
+    content_type_id INTEGER      NOT NULL REFERENCES content_type (id) ON DELETE CASCADE
 );
 
 --
--- TABLE AUTH_GROUP
+-- TABLE GROUPS
 --
 
-CREATE TABLE auth_group
+CREATE TABLE groups
 (
     id   SERIAL PRIMARY KEY,
     name VARCHAR(40) NOT NULL UNIQUE
@@ -41,14 +41,14 @@ CREATE TABLE auth_group
 
 
 --
--- TABLE AUTH_GROUP_PERMISSIONS
+-- TABLE GROUPS_PERMISSIONS
 --
 
-CREATE TABLE auth_group_permissions
+CREATE TABLE group_permissions
 (
     id            SERIAL PRIMARY KEY,
-    group_id      INTEGER NOT NULL REFERENCES auth_group (id) ON DELETE CASCADE,
-    permission_id INTEGER NOT NULL REFERENCES auth_permission (id) ON DELETE CASCADE
+    group_id      INTEGER NOT NULL REFERENCES groups (id) ON DELETE CASCADE,
+    permission_id INTEGER NOT NULL REFERENCES permissions (id) ON DELETE CASCADE
 );
 
 --
@@ -87,25 +87,25 @@ CREATE TABLE users
 );
 
 --
--- TABLE USER_PERMISSIONS
+-- TABLE USERS_PERMISSIONS
 --
 
 CREATE TABLE user_permissions
 (
     id            SERIAL PRIMARY KEY,
     user_id       INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    permission_id INTEGER NOT NULL REFERENCES auth_permission (id) ON DELETE CASCADE UNIQUE
+    permission_id INTEGER NOT NULL REFERENCES permissions (id) ON DELETE CASCADE UNIQUE
 );
 
 --
--- TABLE USER_GROUPS
+-- TABLE USERS_GROUPS
 --
 
 CREATE TABLE user_groups
 (
     id       SERIAL PRIMARY KEY,
-    user_id  INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE UNIQUE,
-    group_id INTEGER NOT NULL REFERENCES auth_group (id) ON DELETE CASCADE UNIQUE
+    user_id  INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    group_id INTEGER NOT NULL REFERENCES groups (id) ON DELETE CASCADE UNIQUE
 );
 
 --
@@ -134,9 +134,9 @@ CREATE TABLE appointments
 CREATE TABLE rooms
 (
     id            SERIAL PRIMARY KEY,
-    name          VARCHAR(60) NOT NULL UNIQUE,
     user_owner    INTEGER     NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     user_receiver INTEGER     NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    name          VARCHAR(60) NOT NULL UNIQUE,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

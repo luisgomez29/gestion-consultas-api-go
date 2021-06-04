@@ -19,11 +19,11 @@ type AccountsController interface {
 
 type accountsController struct {
 	auth         auth.Auth
-	accountsRepo repo.AccountsRepository
+	accountsRepo repo.AccountRepository
 }
 
 // NewAccountsController crea un nuevo controlador de autenticación
-func NewAccountsController(at auth.Auth, a repo.AccountsRepository) AccountsController {
+func NewAccountsController(at auth.Auth, a repo.AccountRepository) AccountsController {
 	return accountsController{auth: at, accountsRepo: a}
 }
 
@@ -35,6 +35,10 @@ func (ct accountsController) SignUp(c echo.Context) error {
 
 	if err := input.Validate(); err != nil {
 		return err
+	}
+
+	if input.Password != input.PasswordConfirmation {
+		return api.PasswordMismatch
 	}
 
 	user, err := ct.accountsRepo.SignUp(input)

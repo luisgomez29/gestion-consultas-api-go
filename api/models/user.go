@@ -55,7 +55,7 @@ func (u UserIdentificationType) String() string {
 	return val[u]
 }
 
-// User representa la tabla users en la DB
+// User representa un usuario
 type User struct {
 	utils.Model
 	Role                 string     `json:"role"`

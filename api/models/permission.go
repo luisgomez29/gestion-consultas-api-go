@@ -15,14 +15,14 @@ type Permission struct {
 	ID            uint   `json:"id"`
 	Name          string `json:"name"`
 	Codename      string `json:"codename"`
-	ContentTypeID uint   `json:"content_type_id,omitempty"`
+	ContentTypeID uint   `json:"content_type,omitempty"`
 }
 
 func (*Permission) ValidatePgError(err error) error {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
 		if pgErr.Code == pgerrcode.UniqueViolation {
-			return validation.Errors{"group": errors.New("el usuario ya esta asignado a este grupo")}
+			return validation.Errors{"codename": errors.New("ya existe un permiso con este codename")}
 		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}

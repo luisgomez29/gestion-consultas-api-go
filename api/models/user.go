@@ -93,6 +93,5 @@ func (*User) ValidatePgError(err error) error {
 		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-
 	return echo.NewHTTPError(http.StatusInternalServerError, err)
 }

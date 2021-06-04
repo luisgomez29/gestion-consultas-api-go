@@ -41,7 +41,7 @@ CREATE TABLE groups
 
 
 --
--- TABLE GROUPS_PERMISSIONS
+-- TABLE GROUP_PERMISSIONS
 --
 
 CREATE TABLE group_permissions
@@ -87,7 +87,7 @@ CREATE TABLE users
 );
 
 --
--- TABLE USERS_PERMISSIONS
+-- TABLE USER_PERMISSIONS
 --
 
 CREATE TABLE user_permissions
@@ -98,7 +98,7 @@ CREATE TABLE user_permissions
 );
 
 --
--- TABLE USERS_GROUPS
+-- TABLE USER_GROUPS
 --
 
 CREATE TABLE user_groups

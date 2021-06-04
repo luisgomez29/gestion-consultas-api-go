@@ -41,7 +41,14 @@ func (ct accountsController) SignUp(c echo.Context) error {
 		return api.PasswordMismatch
 	}
 
-	user, err := ct.accountsRepo.SignUp(input)
+	// Generating password Hash
+	hash, err := ct.auth.HashPassword(input.Password)
+	if err != nil {
+		return err
+	}
+
+	input.Password = hash
+	user, err := ct.accountsRepo.CreateUser(input)
 	if err != nil {
 		return err
 	}
@@ -53,7 +60,7 @@ func (ct accountsController) SignUp(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, auth.JWTResponse{
 		Token: token,
-		User:  user,
+		User:  responses.UserResponse(user),
 	})
 }
 
@@ -67,12 +74,14 @@ func (ct accountsController) Login(c echo.Context) error {
 		return err
 	}
 
-	user, err := ct.accountsRepo.Login(input)
+	user, err := ct.accountsRepo.FindUser(input)
 	if err != nil {
 		return err
 	}
 
-	if err := ct.auth.VerifyPassword(user.Password, input.Password); err != nil {
+	// Check if password is valid
+	match, err := ct.auth.VerifyPassword(input.Password, user.Password)
+	if !match || err != nil {
 		return api.Unauthorized("la contraseña ingresada es incorrecta")
 	}
 
@@ -81,7 +90,7 @@ func (ct accountsController) Login(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, auth.JWTResponse{
+	return c.JSON(http.StatusOK, auth.JWTResponse{
 		Token:        token,
 		RefreshToken: "",
 		User:         responses.UserResponse(user),

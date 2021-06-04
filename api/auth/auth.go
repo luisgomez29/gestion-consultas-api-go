@@ -2,8 +2,6 @@
 package auth
 
 import (
-	"errors"
-
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 
@@ -12,9 +10,12 @@ import (
 )
 
 type Auth interface {
+	// HashPassword retorna el hash argon2id de las contraseña
+	HashPassword(password string) (string, error)
+
 	// VerifyPassword verifica que coincidan el hash de la contraseña en la base de datos con la
 	// contraseña ingresada por el usuario.
-	VerifyPassword(hashedPassword, password string) error
+	VerifyPassword(password, hashedPassword string) (bool, error)
 
 	// UsernameFromContext obtiene el username del usuario de la solicitud.
 	UsernameFromContext(c echo.Context) string
@@ -71,11 +72,19 @@ func NewAuth(at repo.AuthRepository) Auth {
 	return auth{authRepo: at}
 }
 
-func (auth) VerifyPassword(hashedPassword, password string) error {
-	if hashedPassword != password {
-		return errors.New("las contraseñas no coinciden")
+func (auth) HashPassword(password string) (string, error) {
+	c := &passwordConfig{
+		memory:      102400,
+		iterations:  2,
+		parallelism: 8,
+		saltLength:  16,
+		keyLength:   16,
 	}
-	return nil
+	return generatePassword(c, password)
+}
+
+func (auth) VerifyPassword(password, hashedPassword string) (bool, error) {
+	return comparePasswordAndHash(password, hashedPassword)
 }
 
 func (r auth) UsernameFromContext(c echo.Context) string {

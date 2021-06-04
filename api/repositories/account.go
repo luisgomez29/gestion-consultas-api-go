@@ -14,8 +14,8 @@ import (
 
 // AccountRepository encapsula la lógica para acceder a los usuarios desde la base de datos.
 type AccountRepository interface {
-	SignUp(res *responses.SignUpResponse) (*models.User, error)
-	Login(res *responses.LoginResponse) (*models.User, error)
+	CreateUser(res *responses.SignUpResponse) (*models.User, error)
+	FindUser(res *responses.LoginResponse) (*models.User, error)
 }
 
 type accountRepository struct {
@@ -28,7 +28,7 @@ func NewAccountRepository(db *pgxpool.Pool, g GroupRepository) AccountRepository
 	return accountRepository{conn: db, group: g}
 }
 
-func (r accountRepository) SignUp(res *responses.SignUpResponse) (*models.User, error) {
+func (r accountRepository) CreateUser(res *responses.SignUpResponse) (*models.User, error) {
 	query := `
 		INSERT INTO users(role, first_name, last_name, identification_type, identification_number, username, email,
 		password, phone, city, neighborhood, address, is_active, is_staff, is_superuser)
@@ -61,11 +61,11 @@ func (r accountRepository) SignUp(res *responses.SignUpResponse) (*models.User, 
 	return user, nil
 }
 
-func (r accountRepository) Login(res *responses.LoginResponse) (*models.User, error) {
+func (r accountRepository) FindUser(res *responses.LoginResponse) (*models.User, error) {
 	query := `
 		SELECT id, role, first_name, last_name, identification_type, identification_number, username, email, password,
 		phone, picture, city, neighborhood, address, is_active, is_staff, is_superuser, last_login, created_at, updated_at
-		FROM user WHERE username = $1;`
+		FROM users WHERE username = $1;`
 
 	user := new(models.User)
 	if err := pgxscan.Get(context.Background(), r.conn, user, query, &res.Username); err != nil {

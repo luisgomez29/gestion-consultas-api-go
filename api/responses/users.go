@@ -9,7 +9,7 @@ import (
 
 // UserResponse lista los campos a retornar para los tipos de usuario
 func UserResponse(u *models.User) *models.User {
-	if u.Role == models.UserDefault.String() || u.Role == models.UserDoctor.String() {
+	if u.Role != models.UserAdmin.String() {
 		u.IsActive = false
 	}
 	u.Password = ""

@@ -28,6 +28,7 @@ var (
 	errJWTimeSetting = echo.NewHTTPError(http.StatusInternalServerError, "Invalid time definition in .env file")
 )
 
+// Claims define el username del usuario y las claims estándar para generar el JWT token.
 type Claims struct {
 	jwt.StandardClaims
 
@@ -35,6 +36,7 @@ type Claims struct {
 	Username  string
 }
 
+// GenerateToken genera un JWT token a partir de las claims.
 func GenerateToken(c *Claims) (string, error) {
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"token_type": c.TokenType,
@@ -104,6 +106,7 @@ func ExtractToken(authzHeader string) (string, error) {
 	return "", errJWTMissing
 }
 
+// newAccessAndRefreshClaims define las claims de los JWT token de acceso y actualización.
 func newAccessAndRefreshClaims(username string) ([]*Claims, error) {
 	atTime, err := utils.TimeDuration(config.Load("JWT_ACCESS_TOKEN_EXPIRATION_MINUTES"))
 	if err != nil {

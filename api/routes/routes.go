@@ -12,6 +12,7 @@ import (
 func AccountsHandlers(g *echo.Group, ctrl controllers.AccountsController) {
 	g.POST("/signup", ctrl.SignUp)
 	g.POST("/login", ctrl.Login)
+	g.POST("/verify-token", ctrl.VerifyToken)
 }
 
 // UsersHandlers establece las rutas para models.User

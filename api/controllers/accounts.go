@@ -16,6 +16,7 @@ import (
 type AccountsController interface {
 	SignUp(c echo.Context) error
 	Login(c echo.Context) error
+	VerifyToken(c echo.Context) error
 }
 
 type accountsController struct {
@@ -81,7 +82,26 @@ func (ct accountsController) Login(c echo.Context) error {
 	return ct.accountResponse(c, user)
 }
 
-// accountResponse retorna los tokens y el usuario
+func (ct accountsController) VerifyToken(c echo.Context) error {
+	input := new(responses.TokenResponse)
+	if err := c.Bind(input); err != nil {
+		return apierrors.BadRequest("")
+	}
+
+	if err := input.Validate(); err != nil {
+		return err
+	}
+
+	data, err := ct.auth.VerifyToken(input.Token)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, data)
+}
+
+// accountResponse retorna los tokens de acceso y actualización y el usuario, se mostraran los atributos
+// dependiendo del rol.
 func (ct accountsController) accountResponse(c echo.Context, user *models.User) error {
 	tokens, err := ct.auth.TokenObtainPair(user.Username)
 	if err != nil {

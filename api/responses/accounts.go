@@ -93,41 +93,54 @@ func PasswordValidator(value interface{}) error {
 	return nil
 }
 
-// SignUpResponse define los campos para que un usuario se registre
+// SignUpResponse representa la solicitud del usuario para la creación de una cuenta.
 type SignUpResponse struct {
 	*UserBaseResponse
+
 	Password             string `json:"password,omitempty"`
 	PasswordConfirmation string `json:"password_confirmation,omitempty"`
 }
 
 // Validate valida los campos de SignUpResponse
-func (s *SignUpResponse) Validate() error {
-	return validation.ValidateStruct(s,
-		validation.Field(&s.FirstName, firstNameRule...),
-		validation.Field(&s.LastName, lastNameRule...),
-		validation.Field(&s.IdentificationType, identificationTypeRule...),
-		validation.Field(&s.IdentificationNumber, identificationNumberRule...),
-		validation.Field(&s.Username, usernameRule...),
-		validation.Field(&s.Email, emailRule...),
-		validation.Field(&s.Phone, phoneRule...),
-		validation.Field(&s.City, cityRule...),
-		validation.Field(&s.Neighborhood, neighborhoodRule...),
-		validation.Field(&s.Address, addressRule...),
-		validation.Field(&s.Password, passwordRule...),
-		validation.Field(&s.PasswordConfirmation, passwordConfirmationRule...),
+func (rs *SignUpResponse) Validate() error {
+	return validation.ValidateStruct(rs,
+		validation.Field(&rs.FirstName, firstNameRule...),
+		validation.Field(&rs.LastName, lastNameRule...),
+		validation.Field(&rs.IdentificationType, identificationTypeRule...),
+		validation.Field(&rs.IdentificationNumber, identificationNumberRule...),
+		validation.Field(&rs.Username, usernameRule...),
+		validation.Field(&rs.Email, emailRule...),
+		validation.Field(&rs.Phone, phoneRule...),
+		validation.Field(&rs.City, cityRule...),
+		validation.Field(&rs.Neighborhood, neighborhoodRule...),
+		validation.Field(&rs.Address, addressRule...),
+		validation.Field(&rs.Password, passwordRule...),
+		validation.Field(&rs.PasswordConfirmation, passwordConfirmationRule...),
 	)
 }
 
-// LoginResponse define los campos para que un usuario inicie sesión
+// LoginResponse representa la solicitud para el inicio de sesión del usuario.
 type LoginResponse struct {
 	Username string `json:"username"`
 	Password string `json:"password,omitempty"`
 }
 
 // Validate valida los campos de LoginResponse
-func (l *LoginResponse) Validate() error {
-	return validation.ValidateStruct(l,
-		validation.Field(&l.Username, usernameRule...),
-		validation.Field(&l.Password, validation.Required.Error("la contraseña es requerida")),
+func (rs *LoginResponse) Validate() error {
+	return validation.ValidateStruct(rs,
+		validation.Field(&rs.Username, usernameRule...),
+		validation.Field(&rs.Password, validation.Required.Error("la contraseña es requerida")),
+	)
+}
+
+// TokenResponse representa la solicitud para verificar o actualizar un token JWT.
+type TokenResponse struct {
+	Token string `json:"token"`
+}
+
+// Validate valida los campos de TokenResponse.
+func (rs *TokenResponse) Validate() error {
+	return validation.ValidateStruct(rs,
+		validation.Field(&rs.Token, validation.Required.Error("el token es requerido")),
 	)
 }

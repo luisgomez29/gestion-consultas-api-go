@@ -25,7 +25,7 @@ func Authentication(isRequired bool) echo.MiddlewareFunc {
 					return err
 				}
 
-				claims, err := auth.VerifyToken(tokenString)
+				claims, err := auth.VerifyTokenWithType(tokenString, auth.JWTAccessToken)
 				if err != nil {
 					return err
 				}

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
@@ -14,35 +15,46 @@ import (
 // Tipo de autorización
 const authorizationTypeBearer = "Bearer"
 
-// jwtSecretKet es la clave para firmar los tokens
-var jwtSecretKet = []byte(config.Load("JWT_ACCESS_SECRET_KEY"))
+// JWT tokens type
+const (
+	JWTAccessToken  = "access"
+	JWTRefreshToken = "refresh"
+)
 
 // Errores
 var (
-	ErrJWTMissing = echo.NewHTTPError(http.StatusBadRequest, "token faltante o tiene un formato incorrecto")
-	ErrJWTInvalid = echo.NewHTTPError(http.StatusUnauthorized, "token inválido o expirado")
+	errJWTMissing    = echo.NewHTTPError(http.StatusBadRequest, "token faltante o tiene un formato incorrecto")
+	errJWTInvalid    = echo.NewHTTPError(http.StatusUnauthorized, "token inválido o expirado")
+	errJWTimeSetting = echo.NewHTTPError(http.StatusInternalServerError, "Invalid time definition in .env file")
 )
 
-// GenerateToken genera el token de acceso
-func GenerateToken(username string) (string, error) {
+type Claims struct {
+	jwt.StandardClaims
+
+	TokenType string
+	Username  string
+}
+
+func GenerateToken(c *Claims) (string, error) {
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": username,
-		"type":     "access_token",
-		"iat":      time.Now().Unix(),
-		"exp":      time.Now().Add(time.Hour * utils.Hours(config.Load("JWT_ACCESS_TOKEN_EXPIRATION_DAYS"))).Unix(),
-	}).SignedString(jwtSecretKet)
+		"token_type": c.TokenType,
+		"username":   c.Username,
+		"jti":        c.Id,
+		"iat":        c.IssuedAt,
+		"exp":        c.ExpiresAt,
+	}).SignedString([]byte(config.Load("JWT_SIGNING_KEY")))
 
 	if err != nil {
 		return "", echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-
 	return token, nil
 }
 
-// VerifyToken verifica que el token sea valido
-func VerifyToken(tokenString string) (jwt.MapClaims, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return jwtSecretKet, nil
+// VerifyToken no verifica el "token_type" de la claim. Es útil cuando se realiza la
+// validación general de la firma de un token.
+func VerifyToken(token string) (jwt.MapClaims, error) {
+	tk, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		return []byte(config.Load("JWT_SIGNING_KEY")), nil
 	})
 
 	if err != nil {
@@ -51,22 +63,36 @@ func VerifyToken(tokenString string) (jwt.MapClaims, error) {
 			vErr := err.(*jwt.ValidationError)
 			switch vErr.Errors {
 			case jwt.ValidationErrorMalformed:
-				return nil, ErrJWTMissing
+				return nil, errJWTMissing
 			case jwt.ValidationErrorExpired, jwt.ValidationErrorSignatureInvalid:
-				return nil, ErrJWTInvalid
+				return nil, errJWTInvalid
 			default:
-				return nil, ErrJWTMissing
+				return nil, errJWTMissing
 			}
 		default:
-			return nil, ErrJWTMissing
+			return nil, errJWTMissing
 		}
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return claims, err
+	if claims, ok := tk.Claims.(jwt.MapClaims); ok && tk.Valid {
+		return claims, nil
 	}
 
-	return nil, ErrJWTMissing
+	return nil, errJWTMissing
+}
+
+// VerifyTokenWithType verifica que el token sea valido y el "token_type" de la claim.
+func VerifyTokenWithType(token string, tokenType string) (jwt.MapClaims, error) {
+	claims, err := VerifyToken(token)
+	if err != nil {
+		return nil, err
+	}
+
+	// Verificar el tipo de token
+	if claims["token_type"] != tokenType {
+		return nil, errJWTInvalid
+	}
+	return claims, nil
 }
 
 // ExtractToken obtiene el token del header de la solicitud
@@ -75,5 +101,40 @@ func ExtractToken(authzHeader string) (string, error) {
 	if len(authzHeader) > l+1 && authzHeader[:l] == authorizationTypeBearer {
 		return authzHeader[l+1:], nil
 	}
-	return "", ErrJWTMissing
+	return "", errJWTMissing
+}
+
+func newAccessAndRefreshClaims(username string) ([]*Claims, error) {
+	atTime, err := utils.TimeDuration(config.Load("JWT_ACCESS_TOKEN_EXPIRATION_MINUTES"))
+	if err != nil {
+		return nil, errJWTimeSetting
+	}
+
+	rtTime, err := utils.TimeDuration(config.Load("JWT_REFRESH_TOKEN_EXPIRATION_DAYS"))
+	if err != nil {
+		return nil, errJWTimeSetting
+	}
+
+	acClaims := &Claims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Minute * atTime).Unix(),
+			Id:        uuid.NewString(),
+			IssuedAt:  time.Now().Unix(),
+		},
+		TokenType: JWTAccessToken,
+		Username:  username,
+	}
+
+	rfClaims := &Claims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 24 * rtTime).Unix(),
+			Id:        uuid.NewString(),
+			IssuedAt:  time.Now().Unix(),
+		},
+		TokenType: JWTRefreshToken,
+		Username:  username,
+	}
+
+	claims := []*Claims{acClaims, rfClaims}
+	return claims, nil
 }

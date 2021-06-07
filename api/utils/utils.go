@@ -2,14 +2,13 @@ package utils
 
 import (
 	"errors"
-	"log"
 	"regexp"
 	"strconv"
 	"time"
 
 	"github.com/jackc/pgx/v4"
 
-	api "github.com/luisgomez29/gestion-consultas-api/api/errors"
+	apierrors "github.com/luisgomez29/gestion-consultas-api/api/errors"
 )
 
 // Expresiones regulares
@@ -32,16 +31,17 @@ type Model struct {
 // ValidateErrNoRows verifica si el error es de tipo pgx.ErrNoRows
 func ValidateErrNoRows(err error, msg string) error {
 	if errors.Is(err, pgx.ErrNoRows) {
-		return api.NewErrNoRows(msg)
+		return apierrors.NewErrNoRows(msg)
 	}
 	return err
 }
 
-//Hours convierte el número de dias a horas
-func Hours(days string) time.Duration {
-	d, err := strconv.Atoi(days)
+// TimeDuration convierte un string a time.Duration
+func TimeDuration(t string) (time.Duration, error) {
+	tc, err := strconv.Atoi(t)
 	if err != nil {
-		log.Printf("Error converting in Integer %v", err)
+		//log.Printf("Error converting in Integer %v", err)
+		return 0, err
 	}
-	return time.Duration(24 * d)
+	return time.Duration(tc), nil
 }

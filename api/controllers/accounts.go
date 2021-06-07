@@ -6,8 +6,9 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/auth"
-	api "github.com/luisgomez29/gestion-consultas-api/api/errors"
-	repo "github.com/luisgomez29/gestion-consultas-api/api/repositories"
+	apierrors "github.com/luisgomez29/gestion-consultas-api/api/errors"
+	"github.com/luisgomez29/gestion-consultas-api/api/models"
+	"github.com/luisgomez29/gestion-consultas-api/api/repositories"
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
 )
 
@@ -19,18 +20,18 @@ type AccountsController interface {
 
 type accountsController struct {
 	auth         auth.Auth
-	accountsRepo repo.AccountRepository
+	accountsRepo repositories.AccountRepository
 }
 
 // NewAccountsController crea un nuevo controlador de autenticación
-func NewAccountsController(at auth.Auth, a repo.AccountRepository) AccountsController {
+func NewAccountsController(at auth.Auth, a repositories.AccountRepository) AccountsController {
 	return accountsController{auth: at, accountsRepo: a}
 }
 
 func (ct accountsController) SignUp(c echo.Context) error {
 	input := new(responses.SignUpResponse)
 	if err := c.Bind(input); err != nil {
-		return api.BadRequest("")
+		return apierrors.BadRequest("")
 	}
 
 	if err := input.Validate(); err != nil {
@@ -38,7 +39,7 @@ func (ct accountsController) SignUp(c echo.Context) error {
 	}
 
 	if input.Password != input.PasswordConfirmation {
-		return api.PasswordMismatch
+		return apierrors.PasswordMismatch
 	}
 
 	// Generating password Hash
@@ -53,21 +54,13 @@ func (ct accountsController) SignUp(c echo.Context) error {
 		return err
 	}
 
-	token, err := auth.GenerateToken(user.Username)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusCreated, auth.JWTResponse{
-		Token: token,
-		User:  responses.UserResponse(user),
-	})
+	return ct.accountResponse(c, user)
 }
 
 func (ct accountsController) Login(c echo.Context) error {
 	input := new(responses.LoginResponse)
 	if err := c.Bind(input); err != nil {
-		return api.BadRequest("")
+		return apierrors.BadRequest("")
 	}
 
 	if err := input.Validate(); err != nil {
@@ -82,17 +75,22 @@ func (ct accountsController) Login(c echo.Context) error {
 	// Check if password is valid
 	match, err := ct.auth.VerifyPassword(input.Password, user.Password)
 	if !match || err != nil {
-		return api.Unauthorized("la contraseña ingresada es incorrecta")
+		return apierrors.Unauthorized("la contraseña ingresada es incorrecta")
 	}
 
-	token, err := auth.GenerateToken(user.Username)
+	return ct.accountResponse(c, user)
+}
+
+// accountResponse retorna los tokens y el usuario
+func (ct accountsController) accountResponse(c echo.Context, user *models.User) error {
+	tokens, err := ct.auth.TokenObtainPair(user.Username)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, auth.JWTResponse{
-		Token:        token,
-		RefreshToken: "",
+	return c.JSON(http.StatusCreated, auth.JWTResponse{
+		AccessToken:  tokens["access"],
+		RefreshToken: tokens["refresh"],
 		User:         responses.UserResponse(user),
 	})
 }

@@ -8,7 +8,7 @@ import (
 
 	"github.com/luisgomez29/gestion-consultas-api/api/auth"
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
-	repo "github.com/luisgomez29/gestion-consultas-api/api/repositories"
+	"github.com/luisgomez29/gestion-consultas-api/api/repositories"
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
 )
 
@@ -20,11 +20,11 @@ type UsersController interface {
 
 type usersController struct {
 	auth      auth.Auth
-	usersRepo repo.UserRepository
+	usersRepo repositories.UserRepository
 }
 
 // NewUsersController crea un nuevo controlador de usuarios.
-func NewUsersController(at auth.Auth, u repo.UserRepository) UsersController {
+func NewUsersController(at auth.Auth, u repositories.UserRepository) UsersController {
 	return usersController{auth: at, usersRepo: u}
 }
 
@@ -41,7 +41,7 @@ func (ct usersController) UsersList(c echo.Context) error {
 		return err
 	}
 
-	fmt.Printf("PERMISOS%v\n", permissions[0])
+	fmt.Printf("PERMISOS%v\n", permissions)
 
 	permission, err := ct.auth.HasPermission(authUser.User, "delete_permission")
 	if err != nil {

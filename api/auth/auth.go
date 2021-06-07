@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
-	repo "github.com/luisgomez29/gestion-consultas-api/api/repositories"
+	"github.com/luisgomez29/gestion-consultas-api/api/repositories"
 )
 
 type Auth interface {
@@ -16,6 +16,9 @@ type Auth interface {
 	// VerifyPassword verifica que coincidan el hash de la contraseña en la base de datos con la
 	// contraseña ingresada por el usuario.
 	VerifyPassword(password, hashedPassword string) (bool, error)
+
+	// TokenObtainPair genera los JWT token access y refresh
+	TokenObtainPair(username string) (map[string]string, error)
 
 	// UsernameFromContext obtiene el username del usuario de la solicitud.
 	UsernameFromContext(c echo.Context) string
@@ -38,10 +41,6 @@ type Auth interface {
 }
 
 type (
-	auth struct {
-		authRepo repo.AuthRepository
-	}
-
 	// AccessDetails representa el usuario que ha iniciado sesión.
 	AccessDetails struct {
 		TokenUuid string
@@ -50,25 +49,17 @@ type (
 
 	// JWTResponse es la respuesta cuando el usuario inicia sesión o se registra.
 	JWTResponse struct {
-		Token        string       `json:"token"`
+		AccessToken  string       `json:"access_token"`
 		RefreshToken string       `json:"refresh_token"`
 		User         *models.User `json:"user"`
 	}
-
-	//AccessToken struct {
-	//	Uuid      string
-	//	Token     string
-	//	ExpiresAt int64
-	//}
-	//
-	//RefreshToken struct {
-	//	Uuid      string
-	//	Token     string
-	//	ExpiresAt int64
-	//}
 )
 
-func NewAuth(at repo.AuthRepository) Auth {
+type auth struct {
+	authRepo repositories.AuthRepository
+}
+
+func NewAuth(at repositories.AuthRepository) Auth {
 	return auth{authRepo: at}
 }
 
@@ -85,6 +76,29 @@ func (auth) HashPassword(password string) (string, error) {
 
 func (auth) VerifyPassword(password, hashedPassword string) (bool, error) {
 	return comparePasswordAndHash(password, hashedPassword)
+}
+
+func (auth) TokenObtainPair(username string) (map[string]string, error) {
+	claims, err := newAccessAndRefreshClaims(username)
+	if err != nil {
+		return nil, err
+	}
+
+	accessToken, err := GenerateToken(claims[0])
+	if err != nil {
+		return nil, err
+	}
+
+	refreshToken, err := GenerateToken(claims[1])
+	if err != nil {
+		return nil, err
+	}
+
+	tokens := map[string]string{
+		"access":  accessToken,
+		"refresh": refreshToken,
+	}
+	return tokens, nil
 }
 
 func (r auth) UsernameFromContext(c echo.Context) string {

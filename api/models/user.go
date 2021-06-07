@@ -20,7 +20,7 @@ type (
 
 const (
 	// UserAdmin usuario con rol administrador (ADMIN)
-	UserAdmin UserRole = iota
+	UserAdmin UserRole = iota + 1
 
 	// UserDoctor usuario con rol doctor (DOC)
 	UserDoctor
@@ -35,12 +35,12 @@ func (u UserRole) String() string {
 	if u < UserAdmin || u > UserDefault {
 		return ""
 	}
-	return val[u]
+	return val[u-1]
 }
 
 const (
 	// IdentificationTypeCC tipo de identificación cedula de ciudadanía (CC)
-	IdentificationTypeCC UserIdentificationType = iota
+	IdentificationTypeCC UserIdentificationType = iota + 1
 
 	// IdentificationTypeCE tipo de identificación cedula de extranjería (CE)
 	IdentificationTypeCE
@@ -52,12 +52,13 @@ func (u UserIdentificationType) String() string {
 	if u < IdentificationTypeCC || u > IdentificationTypeCE {
 		return ""
 	}
-	return val[u]
+	return val[u-1]
 }
 
 // User representa un usuario
 type User struct {
 	utils.Model
+
 	Role                 string     `json:"role"`
 	FirstName            string     `json:"first_name"`
 	LastName             string     `json:"last_name"`

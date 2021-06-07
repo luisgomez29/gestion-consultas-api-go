@@ -8,7 +8,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/labstack/echo/v4"
 
-	api "github.com/luisgomez29/gestion-consultas-api/api/errors"
+	apierrors "github.com/luisgomez29/gestion-consultas-api/api/errors"
 )
 
 // ErrorHandler crea un middleware que gestiona los pánicos y errores encontrados durante el procesamiento de
@@ -30,24 +30,24 @@ func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 func buildErrorResponse(err error) error {
 	switch err.(type) {
 	case validation.Errors:
-		return api.InvalidInput(err.(validation.Errors))
+		return apierrors.InvalidInput(err.(validation.Errors))
 	case *echo.HTTPError:
 		switch err.(*echo.HTTPError).Code {
 		case http.StatusNotFound:
-			return api.NotFound("")
+			return apierrors.NotFound("")
 		case http.StatusInternalServerError:
-			return api.InternalServerError("")
+			return apierrors.InternalServerError("")
 		case http.StatusForbidden:
-			return api.Forbidden("")
+			return apierrors.Forbidden("")
 		default:
 			return err
 		}
 	}
 
-	var errNoRows *api.ErrNoRows
+	var errNoRows *apierrors.ErrNoRows
 	if errors.As(err, &errNoRows) {
 		return echo.NewHTTPError(http.StatusNotFound, errNoRows.Error())
 	}
 
-	return api.InternalServerError("")
+	return apierrors.InternalServerError("")
 }

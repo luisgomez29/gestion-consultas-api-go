@@ -9,10 +9,10 @@ import (
 
 	"github.com/luisgomez29/gestion-consultas-api/api/auth"
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
-	ctrl "github.com/luisgomez29/gestion-consultas-api/api/controllers"
+	"github.com/luisgomez29/gestion-consultas-api/api/controllers"
 	"github.com/luisgomez29/gestion-consultas-api/api/database"
 	"github.com/luisgomez29/gestion-consultas-api/api/middlewares"
-	repo "github.com/luisgomez29/gestion-consultas-api/api/repositories"
+	"github.com/luisgomez29/gestion-consultas-api/api/repositories"
 	"github.com/luisgomez29/gestion-consultas-api/api/routes"
 )
 
@@ -43,18 +43,18 @@ func setupRoutes(db *pgxpool.Pool, e *echo.Echo) {
 	v1 := api.Group("/v1")
 
 	// Repositorios
-	permRepo := repo.NewPermissionRepository(db)
-	groupRepo := repo.NewGroupRepository(db)
-	usersRepo := repo.NewUserRepository(db)
-	authRepo := repo.NewAuthRepository(db, permRepo, usersRepo)
-	accountsRepo := repo.NewAccountRepository(db, groupRepo)
+	permRepo := repositories.NewPermissionRepository(db)
+	groupRepo := repositories.NewGroupRepository(db)
+	usersRepo := repositories.NewUserRepository(db)
+	authRepo := repositories.NewAuthRepository(db, permRepo, usersRepo)
+	accountsRepo := repositories.NewAccountRepository(db, groupRepo)
 
 	// Servicio de autenticación
 	authn := auth.NewAuth(authRepo)
 
 	// Accounts
-	routes.AccountsHandlers(v1, ctrl.NewAccountsController(authn, accountsRepo))
+	routes.AccountsHandlers(v1, controllers.NewAccountsController(authn, accountsRepo))
 
 	// Users
-	routes.UsersHandlers(v1, ctrl.NewUsersController(authn, usersRepo))
+	routes.UsersHandlers(v1, controllers.NewUsersController(authn, usersRepo))
 }

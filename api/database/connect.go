@@ -15,8 +15,8 @@ func ConnectDB() *pgxpool.Pool {
 	// postgres://username:password@url.com:port/dbName
 	DSN := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable&timezone=America/Bogota",
-		config.Load("DB_USER"), config.Load("DB_PWD"), config.Load("DB_HOST"), config.Load("DB_PORT"),
-		config.Load("DB_NAME"),
+		config.Load("DB_USER"), config.Load("DB_PWD"), config.Load("DB_HOST"),
+		config.Load("DB_PORT"), config.Load("DB_NAME"),
 	)
 
 	DB, err := pgxpool.Connect(context.Background(), DSN)

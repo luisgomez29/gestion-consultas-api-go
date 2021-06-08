@@ -1,12 +1,18 @@
 package controllers
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
+	"net/mail"
+	"time"
 
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/auth"
+	"github.com/luisgomez29/gestion-consultas-api/api/config"
 	apierrors "github.com/luisgomez29/gestion-consultas-api/api/errors"
+	"github.com/luisgomez29/gestion-consultas-api/api/mailers"
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
 	"github.com/luisgomez29/gestion-consultas-api/api/repositories"
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
@@ -17,6 +23,7 @@ type AccountsController interface {
 	SignUp(c echo.Context) error
 	Login(c echo.Context) error
 	VerifyToken(c echo.Context) error
+	PasswordReset(c echo.Context) error
 }
 
 type accountsController struct {
@@ -68,7 +75,7 @@ func (ct accountsController) Login(c echo.Context) error {
 		return err
 	}
 
-	user, err := ct.accountsRepo.FindUser(input)
+	user, err := ct.accountsRepo.FindUser(input.Username)
 	if err != nil {
 		return err
 	}
@@ -98,6 +105,65 @@ func (ct accountsController) VerifyToken(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, data)
+}
+
+func (ct accountsController) PasswordReset(c echo.Context) error {
+	input := new(responses.PasswordResetResponse)
+	if err := c.Bind(input); err != nil {
+		return apierrors.BadRequest("")
+	}
+
+	if err := input.Validate(); err != nil {
+		return err
+	}
+
+	user, err := ct.accountsRepo.FindUser(input.Username)
+	if err != nil {
+		var apiErr *apierrors.ErrNoRows
+		if errors.As(err, &apiErr) {
+			return apierrors.NewErrNoRows("el usuario no está asignado a ninguna cuenta")
+		}
+		return err
+	}
+
+	// Generate token
+	claims := auth.NewClaims(user.Username)
+	claims.ExpiresAt = time.Now().Add(time.Minute * 15).Unix()
+	claims.TokenType = auth.JWTPasswordResetToken
+
+	token, err := auth.GenerateToken(claims)
+	if err != nil {
+		return err
+	}
+
+	// Email message
+	em := &mailers.EmailMessage{
+		To:      mail.Address{Name: user.FirstName, Address: *user.Email},
+		Subject: "Solicitud de recuperación de contraseña",
+		Template: mailers.Template{
+			Name: "accounts/password_reset_key_message.html",
+			Context: map[string]interface{}{
+				"currentSite":   "Gestión consultas",
+				"userFirstName": "Luis Guillermo",
+				"passwordResetUrl": fmt.Sprintf(
+					"%s/password/reset/key/%s", config.Load("DEFAULT_DOMAIN"), token,
+				),
+			},
+		},
+	}
+
+	// Enviar email
+	ok, err := mailers.Send(em)
+	if !ok || err != nil {
+		return err
+	}
+
+	r := map[string]interface{}{
+		"send_email": ok,
+		"username":   user.Username,
+		"email":      *user.Email,
+	}
+	return c.JSON(http.StatusOK, r)
 }
 
 // accountResponse retorna los tokens de acceso y actualización y el usuario, se mostraran los atributos

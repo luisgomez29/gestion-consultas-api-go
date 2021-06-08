@@ -17,8 +17,9 @@ const authorizationTypeBearer = "Bearer"
 
 // JWT tokens type
 const (
-	JWTAccessToken  = "access"
-	JWTRefreshToken = "refresh"
+	JWTAccessToken        = "access"
+	JWTRefreshToken       = "refresh"
+	JWTPasswordResetToken = "password_reset"
 )
 
 // Errores
@@ -34,6 +35,17 @@ type Claims struct {
 
 	TokenType string
 	Username  string
+}
+
+// NewClaims crea la claims con valores para el Id, IssuedAt y Username.
+func NewClaims(username string) *Claims {
+	return &Claims{
+		StandardClaims: jwt.StandardClaims{
+			Id:       uuid.NewString(),
+			IssuedAt: time.Now().Unix(),
+		},
+		Username: username,
+	}
 }
 
 // GenerateToken genera un JWT token a partir de las claims.
@@ -118,25 +130,13 @@ func newAccessAndRefreshClaims(username string) ([]*Claims, error) {
 		return nil, errJWTimeSetting
 	}
 
-	acClaims := &Claims{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * atTime).Unix(),
-			Id:        uuid.NewString(),
-			IssuedAt:  time.Now().Unix(),
-		},
-		TokenType: JWTAccessToken,
-		Username:  username,
-	}
+	acClaims := NewClaims(username)
+	acClaims.ExpiresAt = time.Now().Add(time.Minute * atTime).Unix()
+	acClaims.TokenType = JWTAccessToken
 
-	rfClaims := &Claims{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 24 * rtTime).Unix(),
-			Id:        uuid.NewString(),
-			IssuedAt:  time.Now().Unix(),
-		},
-		TokenType: JWTRefreshToken,
-		Username:  username,
-	}
+	rfClaims := NewClaims(username)
+	rfClaims.ExpiresAt = time.Now().Add(time.Hour * 24 * rtTime).Unix()
+	rfClaims.TokenType = JWTRefreshToken
 
 	claims := []*Claims{acClaims, rfClaims}
 	return claims, nil

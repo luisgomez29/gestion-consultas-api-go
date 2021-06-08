@@ -144,3 +144,15 @@ func (rs *TokenResponse) Validate() error {
 		validation.Field(&rs.Token, validation.Required.Error("el token es requerido")),
 	)
 }
+
+// PasswordResetResponse representa la solicitud para restaurar la contraseña.
+type PasswordResetResponse struct {
+	Username string `json:"username"`
+}
+
+// Validate valida los campos de PasswordResetResponse.
+func (rs *PasswordResetResponse) Validate() error {
+	return validation.ValidateStruct(rs,
+		validation.Field(&rs.Username, validation.Required.Error("el nombre de usuario es requerido")),
+	)
+}

@@ -114,7 +114,6 @@ func (auth) VerifyToken(token string) (map[string]interface{}, error) {
 		"success": true,
 		"payload": claims,
 	}
-
 	return r, nil
 }
 

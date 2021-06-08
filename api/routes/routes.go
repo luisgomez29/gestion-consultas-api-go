@@ -13,6 +13,7 @@ func AccountsHandlers(g *echo.Group, ctrl controllers.AccountsController) {
 	g.POST("/signup", ctrl.SignUp)
 	g.POST("/login", ctrl.Login)
 	g.POST("/verify-token", ctrl.VerifyToken)
+	g.POST("/password-reset", ctrl.PasswordReset)
 }
 
 // UsersHandlers establece las rutas para models.User

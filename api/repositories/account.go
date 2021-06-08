@@ -15,7 +15,7 @@ import (
 // AccountRepository encapsula la lógica para acceder a los usuarios desde la base de datos.
 type AccountRepository interface {
 	CreateUser(res *responses.SignUpResponse) (*models.User, error)
-	FindUser(res *responses.LoginResponse) (*models.User, error)
+	FindUser(username string) (*models.User, error)
 }
 
 type accountRepository struct {
@@ -61,14 +61,14 @@ func (r accountRepository) CreateUser(res *responses.SignUpResponse) (*models.Us
 	return user, nil
 }
 
-func (r accountRepository) FindUser(res *responses.LoginResponse) (*models.User, error) {
+func (r accountRepository) FindUser(username string) (*models.User, error) {
 	query := `
 		SELECT id, role, first_name, last_name, identification_type, identification_number, username, email, password,
 		phone, picture, city, neighborhood, address, is_active, is_staff, is_superuser, last_login, created_at, updated_at
 		FROM users WHERE username = $1;`
 
 	user := new(models.User)
-	if err := pgxscan.Get(context.Background(), r.conn, user, query, &res.Username); err != nil {
+	if err := pgxscan.Get(context.Background(), r.conn, user, query, &username); err != nil {
 		return nil, utils.ValidateErrNoRows(err, "usuario o contraseña incorrectos")
 	}
 	return user, nil

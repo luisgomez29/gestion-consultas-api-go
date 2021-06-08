@@ -66,14 +66,16 @@ La API REST proporciona las siguientes rutas:
 
 | Name | Route | Protected | Method |
 | ---- | ----- | --------- | ------ |
-| signup | /signup | No | POST |
-| login | /login | No | POST |
+| Signup | /signup | No | POST |
+| Login | /login | No | POST |
+| Verify token | /verify-token | No | POST |
 
 ### Users
 
 | Name | Route | Protected | Method |
 | ---- | ----- | --------- | ------ |
-| Users list  | /users | Yes | GET |
+| Get all users  | /users | Yes | GET |
+| Get User  | /users/:username | Yes | GET |
 
 ## Author
 

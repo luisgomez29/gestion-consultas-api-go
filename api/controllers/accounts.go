@@ -107,6 +107,8 @@ func (ct accountsController) VerifyToken(c echo.Context) error {
 	return c.JSON(http.StatusOK, data)
 }
 
+// PasswordReset verify if the user exists an email is sent with the link to reset the password,
+// which has a time of 15 minutes to expire. If the user does not have an email address, nothing is sent.
 func (ct accountsController) PasswordReset(c echo.Context) error {
 	input := new(responses.PasswordResetResponse)
 	if err := c.Bind(input); err != nil {
@@ -124,6 +126,18 @@ func (ct accountsController) PasswordReset(c echo.Context) error {
 			return apierrors.NewErrNoRows("el usuario no está asignado a ninguna cuenta")
 		}
 		return err
+	}
+
+	// Response
+	r := map[string]interface{}{
+		"send_email": false,
+		"username":   user.Username,
+		"email":      user.Email,
+	}
+
+	// Verify if the user does not have email
+	if user.Email == nil {
+		return c.JSON(http.StatusOK, r)
 	}
 
 	// Generate token
@@ -144,7 +158,7 @@ func (ct accountsController) PasswordReset(c echo.Context) error {
 			Name: "accounts/password_reset_key_message.html",
 			Context: map[string]interface{}{
 				"currentSite":   "Gestión consultas",
-				"userFirstName": "Luis Guillermo",
+				"userFirstName": user.FirstName,
 				"passwordResetUrl": fmt.Sprintf(
 					"%s/password/reset/key/%s", config.Load("DEFAULT_DOMAIN"), token,
 				),
@@ -152,17 +166,13 @@ func (ct accountsController) PasswordReset(c echo.Context) error {
 		},
 	}
 
-	// Enviar email
+	// Send email
 	ok, err := mailers.Send(em)
 	if !ok || err != nil {
 		return err
 	}
 
-	r := map[string]interface{}{
-		"send_email": ok,
-		"username":   user.Username,
-		"email":      *user.Email,
-	}
+	r["send_email"] = ok
 	return c.JSON(http.StatusOK, r)
 }
 

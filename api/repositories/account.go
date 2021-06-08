@@ -65,7 +65,7 @@ func (r accountRepository) FindUser(username string) (*models.User, error) {
 	query := `
 		SELECT id, role, first_name, last_name, identification_type, identification_number, username, email, password,
 		phone, picture, city, neighborhood, address, is_active, is_staff, is_superuser, last_login, created_at, updated_at
-		FROM users WHERE username = $1;`
+		FROM users WHERE username = $1 AND is_active = true`
 
 	user := new(models.User)
 	if err := pgxscan.Get(context.Background(), r.conn, user, query, &username); err != nil {

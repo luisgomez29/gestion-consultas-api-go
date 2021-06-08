@@ -12,7 +12,7 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
 )
 
-// UsersController encapsula la lógica de negocio para los usuarios.
+// UsersController represents endpoints for users.
 type UsersController interface {
 	UsersList(c echo.Context) error
 	UsersRetrieve(c echo.Context) error
@@ -23,7 +23,7 @@ type usersController struct {
 	usersRepo repositories.UserRepository
 }
 
-// NewUsersController crea un nuevo controlador de usuarios.
+// NewUsersController create a new users controller.
 func NewUsersController(at auth.Auth, u repositories.UserRepository) UsersController {
 	return usersController{auth: at, usersRepo: u}
 }

@@ -6,14 +6,14 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/auth"
 )
 
-// Authentication es el middleware de autenticación para los endpoints. Se debe indicar si la autenticación del usuario
-// con JWT token es necesaria.
+// Authentication is the authentication middleware for endpoints. It must be indicated if user
+// authentication with JWT token is required.
 //
-// Si se requiere de la autenticación del usuario y el token es valido se almacena los detalles auth.AccessDetails en el
-// contexto de la solicitud bajo la clave user.
+// If user authentication is required and the token is valid, the auth.AccessDetails are stored in the
+// context of the request under the user key.
 //
-// Si no se requiere autenticación el usuario accede a los datos públicos. Si el usuario se autentica se tratara con la
-// autenticación requerida.
+//If authentication is not required, the user accesses the public data. If the user authenticates,
+// it will deal with the required authentication.
 func Authentication(isRequired bool) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {

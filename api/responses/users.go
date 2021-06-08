@@ -7,7 +7,7 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/utils"
 )
 
-// UserResponse lista los campos a retornar para los tipos de usuario
+// UserResponse lists the fields to return for the user types.
 func UserResponse(u *models.User) *models.User {
 	if u.Role != models.UserAdmin.String() {
 		u.IsActive = false
@@ -16,7 +16,7 @@ func UserResponse(u *models.User) *models.User {
 	return u
 }
 
-// UserBaseResponse contiene los campos del usuario que se retornan sin importar el rol
+// UserBaseResponse contains the user fields that are returned regardless of role.
 type UserBaseResponse struct {
 	FirstName            string  `json:"first_name"`
 	LastName             string  `json:"last_name"`

@@ -1,4 +1,4 @@
-//Package errors
+//Package errors contains the types and functions related to errors
 package errors
 
 import (
@@ -7,19 +7,19 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 
-// DatabaseValidationError define los métodos para verificar los errores de la base de datos
+// DatabaseValidationError defines methods to check for database errors.
 type DatabaseValidationError interface {
 
-	// ValidatePgError verifica el error de la base de datos.
-	// Se debe usar para verificar los errores de unicidad y otros de los campos.
+	// ValidatePgError check the database error.
+	// It should be used to check for uniqueness and other errors in the fields.
 	ValidatePgError(err error) error
 }
 
-// PasswordMismatch ocurre cuando las contraseñas no coinciden
+// PasswordMismatch occurs when passwords do not match
 var PasswordMismatch = validation.Errors{"password": fmt.Errorf("las contraseñas ingresadas no coinciden")}
 
-// ErrNoRows personaliza el mensaje de error cuando ocurre el error de tipo pgx.ErrNoRows.
-// Se usa como valor de retorno de error para utils.ValidateErrNoRows
+// ErrNoRows Customize the error message when the error of type pgx.ErrNoRows occurs.
+// Used as an error return value for utils.ValidateErrNoRows.
 type ErrNoRows struct {
 	msg string
 }

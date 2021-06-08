@@ -18,7 +18,7 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/responses"
 )
 
-// AccountsController encapsula la lógica de negocio de autenticación
+// AccountsController represents endpoints for authentication.
 type AccountsController interface {
 	SignUp(c echo.Context) error
 	Login(c echo.Context) error
@@ -31,7 +31,7 @@ type accountsController struct {
 	accountsRepo repositories.AccountRepository
 }
 
-// NewAccountsController crea un nuevo controlador de autenticación
+// NewAccountsController create a new accounts controller.
 func NewAccountsController(at auth.Auth, a repositories.AccountRepository) AccountsController {
 	return accountsController{auth: at, accountsRepo: a}
 }
@@ -176,8 +176,8 @@ func (ct accountsController) PasswordReset(c echo.Context) error {
 	return c.JSON(http.StatusOK, r)
 }
 
-// accountResponse retorna los tokens de acceso y actualización y el usuario, se mostraran los atributos
-// dependiendo del rol.
+// accountResponse returns the access and refresh JWT tokens and the user.
+//  For the user the attributes are shown depending on the role.
 func (ct accountsController) accountResponse(c echo.Context, user *models.User) error {
 	tokens, err := ct.auth.TokenObtainPair(user.Username)
 	if err != nil {

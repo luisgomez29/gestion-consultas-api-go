@@ -3,7 +3,7 @@
  *
  * Create initial database schema.
  *
- * The created_at and updated_at fields have the default value CURRENT_TIMESTAMP
+ * The created_at and updated_at fields have the default value CURRENT_TIMESTAMP.
  */
 
 --

@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Group representa un grupo
+// Group represents the data about an group.
 type Group struct {
 	ID   uint   `json:"id"`
 	Name string `json:"name"`
@@ -27,7 +27,7 @@ func (*Group) ValidatePgError(err error) error {
 	return echo.NewHTTPError(http.StatusInternalServerError, err)
 }
 
-// UserGroup representa la tabla donde indica a que grupos pertenece el usuario.
+// UserGroup represents the data about an user-group.
 type UserGroup struct {
 	ID      uint `json:"id,omitempty"`
 	UserID  uint `json:"user,omitempty"`

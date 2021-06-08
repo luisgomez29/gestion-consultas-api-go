@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Permission representa un permiso
+// Permission represents the data about an permission.
 type Permission struct {
 	ID            uint   `json:"id"`
 	Name          string `json:"name"`

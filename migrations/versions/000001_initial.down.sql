@@ -1,7 +1,7 @@
 /*
  * Author: Luis Guillermo Gómez Galeano
  *
- * Delete initial database schema
+ * Delete initial database schema.
  */
 
 

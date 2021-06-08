@@ -14,13 +14,14 @@ import (
 )
 
 type (
-	// Template especifica el contexto y la ruta de la plantilla HTML. Por defecto se busca las plantillas
-	// en la carpeta "templates/emails/".
+	// Template specifies the context and name of the HTML template.
+	// By default the templates are searched in the `templates/emails/` folder.
 	Template struct {
 		Name    string
 		Context map[string]interface{}
 	}
 
+	// EmailMessage defines to which user the email is sent, and the HTML template.
 	EmailMessage struct {
 		To       mail.Address
 		Subject  string
@@ -28,7 +29,7 @@ type (
 	}
 )
 
-// smtpConfig define el servidor y el acceso para enviar el email.
+// smtpConfig defines the server and the access to it to send the email.
 type smtpConfig struct {
 	host     string
 	port     string
@@ -36,11 +37,12 @@ type smtpConfig struct {
 	password string
 }
 
-// Address retorna el host y el puerto
+// Address returns host and port (host:port).
 func (s *smtpConfig) Address() string {
 	return fmt.Sprintf("%s:%s", s.host, s.port)
 }
 
+// Send send the email according to EmailMessage.
 func Send(em *EmailMessage) (bool, error) {
 	from := mail.Address{
 		Name:    config.Load("DEFAULT_FROM_EMAIL"),

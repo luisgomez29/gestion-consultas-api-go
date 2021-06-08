@@ -10,7 +10,7 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/utils"
 )
 
-// UserRepository encapsula la lógica para acceder a los usuarios desde la base de datos.
+// UserRepository encapsulates the logic to access users from the data source.
 type UserRepository interface {
 	All() ([]*models.User, error)
 	Get(username string) (*models.User, error)
@@ -19,11 +19,12 @@ type UserRepository interface {
 	Delete(id uint) (uint, error)
 }
 
+//userRepository persists users in database.
 type userRepository struct {
 	conn *pgxpool.Pool
 }
 
-// NewUserRepository crea un nuevo repositorio de usuarios.
+// NewUserRepository  creates a new user repository.
 func NewUserRepository(db *pgxpool.Pool) UserRepository {
 	return userRepository{conn: db}
 }

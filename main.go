@@ -22,7 +22,7 @@ func main() {
 
 	e := echo.New()
 
-	// Middleware
+	// Middlewares
 	e.Use(
 		middleware.Logger(),
 		middleware.Recover(),
@@ -36,20 +36,20 @@ func main() {
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", config.Load("SERVER_PORT"))))
 }
 
-// setupRoutes establece las rutas disponibles de la API
+// setupRoutes sets the available API endpoints.
 func setupRoutes(db *pgxpool.Pool, e *echo.Echo) {
 	// API V1
 	api := e.Group("/api")
 	v1 := api.Group("/v1")
 
-	// Repositorios
+	// Repositories
 	permRepo := repositories.NewPermissionRepository(db)
 	groupRepo := repositories.NewGroupRepository(db)
 	usersRepo := repositories.NewUserRepository(db)
 	authRepo := repositories.NewAuthRepository(db, permRepo, usersRepo)
 	accountsRepo := repositories.NewAccountRepository(db, groupRepo)
 
-	// Servicio de autenticación
+	// Authentication service
 	authn := auth.NewAuth(authRepo)
 
 	// Accounts

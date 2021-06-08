@@ -10,16 +10,16 @@ import (
 )
 
 type AuthRepository interface {
-	// UserLoggedIn obtiene el usuario que ha iniciado sesión.
+	// UserLoggedIn get the user who is logged in from UserRepository.Get.
 	UserLoggedIn(username string) *models.User
 
-	// UserPermissions obtiene los permisos que el usuario tiene en `user_permissions`.
+	// UserPermissions get the permissions that the user has in `user_permissions`.
 	UserPermissions(username string) ([]*models.Permission, error)
 
-	// GroupPermissions obtiene los permisos que el usuario tiene de los grupos a los que pertenece.
-	GroupPermissions(username string) ([]*models.Permission, error)
+	// UserGroupPermissions get the permissions that this user has through their groups.
+	UserGroupPermissions(username string) ([]*models.Permission, error)
 
-	// AllPermissions obtiene todos los permisos definidos en la tabla `permissions`.
+	// AllPermissions get all the permissions defined in the `permissions` table.
 	AllPermissions() ([]*models.Permission, error)
 }
 
@@ -29,6 +29,7 @@ type authRepository struct {
 	user       UserRepository
 }
 
+// NewAuthRepository creates a new auth repository.
 func NewAuthRepository(db *pgxpool.Pool, p PermissionRepository, u UserRepository) AuthRepository {
 	return authRepository{conn: db, permission: p, user: u}
 }
@@ -54,7 +55,7 @@ func (r authRepository) UserPermissions(username string) ([]*models.Permission, 
 	return perms, nil
 }
 
-func (r authRepository) GroupPermissions(username string) ([]*models.Permission, error) {
+func (r authRepository) UserGroupPermissions(username string) ([]*models.Permission, error) {
 	query := `
 			SELECT p.id, p.name, p.codename, p.content_type_id
 			FROM permissions AS p

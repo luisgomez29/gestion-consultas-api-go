@@ -12,7 +12,7 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/utils"
 )
 
-// Tipo de autorización
+// Authorization type
 const authorizationTypeBearer = "Bearer"
 
 // JWT tokens type
@@ -22,14 +22,14 @@ const (
 	JWTPasswordResetToken = "password_reset"
 )
 
-// Errores
+// Errors
 var (
 	errJWTMissing    = echo.NewHTTPError(http.StatusBadRequest, "token faltante o tiene un formato incorrecto")
 	errJWTInvalid    = echo.NewHTTPError(http.StatusUnauthorized, "token inválido o expirado")
 	errJWTimeSetting = echo.NewHTTPError(http.StatusInternalServerError, "Invalid time definition in .env file")
 )
 
-// Claims define el username del usuario y las claims estándar para generar el JWT token.
+// Claims defines the username of the user and the standard claims to generate the JWT token.
 type Claims struct {
 	jwt.StandardClaims
 
@@ -37,7 +37,7 @@ type Claims struct {
 	Username  string
 }
 
-// NewClaims crea la claims con valores para el Id, IssuedAt y Username.
+// NewClaims create the claims with values for the Id, IssuedAt and Username.
 func NewClaims(username string) *Claims {
 	return &Claims{
 		StandardClaims: jwt.StandardClaims{
@@ -48,7 +48,7 @@ func NewClaims(username string) *Claims {
 	}
 }
 
-// GenerateToken genera un JWT token a partir de las claims.
+// GenerateToken generate a JWT token from the claims.
 func GenerateToken(c *Claims) (string, error) {
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"token_type": c.TokenType,
@@ -64,8 +64,8 @@ func GenerateToken(c *Claims) (string, error) {
 	return token, nil
 }
 
-// VerifyToken no verifica el "token_type" de la claim. Es útil cuando se realiza la
-// validación general de la firma de un token.
+// VerifyToken does not verify the "token_type" claim. This is useful when performing general
+// validation of a token's signature.
 func VerifyToken(token string) (jwt.MapClaims, error) {
 	tk, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.Load("JWT_SIGNING_KEY")), nil
@@ -95,7 +95,7 @@ func VerifyToken(token string) (jwt.MapClaims, error) {
 	return nil, errJWTMissing
 }
 
-// VerifyTokenWithType verifica que el token sea valido y el "token_type" de la claim.
+// VerifyTokenWithType verify that the token is valid and the "token_type" of the claim.
 func VerifyTokenWithType(token string, tokenType string) (jwt.MapClaims, error) {
 	claims, err := VerifyToken(token)
 	if err != nil {
@@ -109,7 +109,7 @@ func VerifyTokenWithType(token string, tokenType string) (jwt.MapClaims, error) 
 	return claims, nil
 }
 
-// ExtractToken obtiene el token del header de la solicitud
+// ExtractToken get the token from the request header.
 func ExtractToken(authzHeader string) (string, error) {
 	l := len(authorizationTypeBearer)
 	if len(authzHeader) > l+1 && authzHeader[:l] == authorizationTypeBearer {
@@ -118,7 +118,7 @@ func ExtractToken(authzHeader string) (string, error) {
 	return "", errJWTMissing
 }
 
-// newAccessAndRefreshClaims define las claims de los JWT token de acceso y actualización.
+// newAccessAndRefreshClaims defines the claims of the access and refresh JWT token.
 func newAccessAndRefreshClaims(username string) ([]*Claims, error) {
 	atTime, err := utils.TimeDuration(config.Load("JWT_ACCESS_TOKEN_EXPIRATION_MINUTES"))
 	if err != nil {

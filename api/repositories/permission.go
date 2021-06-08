@@ -9,7 +9,7 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
 )
 
-// PermissionRepository encapsula la lógica para acceder a los permisos.
+// PermissionRepository encapsulates the logic to access permissions from the data source.
 type PermissionRepository interface {
 	All() ([]*models.Permission, error)
 	Get(codename string) (*models.Permission, error)
@@ -18,11 +18,12 @@ type PermissionRepository interface {
 	Delete(codename string) (uint, error)
 }
 
+// permissionRepository persists permissions in database.
 type permissionRepository struct {
 	conn *pgxpool.Pool
 }
 
-// NewPermissionRepository crea un nuevo repositorio de permisos.
+// NewPermissionRepository creates a new permission repository.
 func NewPermissionRepository(db *pgxpool.Pool) PermissionRepository {
 	return permissionRepository{conn: db}
 }

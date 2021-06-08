@@ -11,8 +11,7 @@ import (
 	apierrors "github.com/luisgomez29/gestion-consultas-api/api/errors"
 )
 
-// ErrorHandler crea un middleware que gestiona los pánicos y errores encontrados durante el procesamiento de
-// las peticiones HTTP.
+// ErrorHandler creates a middleware that handles panics and errors encountered during HTTP request processing.
 func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if err := next(c); err != nil {
@@ -26,7 +25,7 @@ func ErrorHandler(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-// buildErrorResponse construye una respuesta de error a partir de un error.
+// buildErrorResponse builds an error response from an error.
 func buildErrorResponse(err error) error {
 	switch err.(type) {
 	case validation.Errors:

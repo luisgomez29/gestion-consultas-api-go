@@ -10,7 +10,7 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
 )
 
-// ConnectDB permite conectarse a la base de datos
+// ConnectDB connect to the database
 func ConnectDB() *pgxpool.Pool {
 	// postgres://username:password@url.com:port/dbName
 	DSN := fmt.Sprintf(

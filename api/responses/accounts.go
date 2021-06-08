@@ -11,7 +11,7 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/utils"
 )
 
-// Validación de los campos del modelo user que ingresa el usuario
+// Validation of user model fields entered by user.
 var (
 	firstNameRule = []validation.Rule{
 		validation.Required.Error("el nombre es requerido"),
@@ -85,6 +85,7 @@ var (
 	}
 )
 
+// PasswordValidator verify that the password has letters and numbers.
 func PasswordValidator(value interface{}) error {
 	s, _ := value.(string)
 	if utils.ReDigit.Match([]byte(s)) || utils.ReLetters.Match([]byte(s)) {
@@ -93,7 +94,7 @@ func PasswordValidator(value interface{}) error {
 	return nil
 }
 
-// SignUpResponse representa la solicitud del usuario para la creación de una cuenta.
+// SignUpResponse represents the user's request for the creation of an account.
 type SignUpResponse struct {
 	*UserBaseResponse
 
@@ -119,13 +120,13 @@ func (rs *SignUpResponse) Validate() error {
 	)
 }
 
-// LoginResponse representa la solicitud para el inicio de sesión del usuario.
+// LoginResponse represents the user's login request.
 type LoginResponse struct {
 	Username string `json:"username"`
 	Password string `json:"password,omitempty"`
 }
 
-// Validate valida los campos de LoginResponse
+// Validate validates the LoginResponse fields.
 func (rs *LoginResponse) Validate() error {
 	return validation.ValidateStruct(rs,
 		validation.Field(&rs.Username, usernameRule...),
@@ -133,24 +134,24 @@ func (rs *LoginResponse) Validate() error {
 	)
 }
 
-// TokenResponse representa la solicitud para verificar o actualizar un token JWT.
+// TokenResponse represents the request to verify or update a JWT token.
 type TokenResponse struct {
 	Token string `json:"token"`
 }
 
-// Validate valida los campos de TokenResponse.
+// Validate validates the TokenResponse fields.
 func (rs *TokenResponse) Validate() error {
 	return validation.ValidateStruct(rs,
 		validation.Field(&rs.Token, validation.Required.Error("el token es requerido")),
 	)
 }
 
-// PasswordResetResponse representa la solicitud para restaurar la contraseña.
+// PasswordResetResponse represents the request to reset the password.
 type PasswordResetResponse struct {
 	Username string `json:"username"`
 }
 
-// Validate valida los campos de PasswordResetResponse.
+// Validate validates the PasswordResetResponse fields.
 func (rs *PasswordResetResponse) Validate() error {
 	return validation.ValidateStruct(rs,
 		validation.Field(&rs.Username, validation.Required.Error("el nombre de usuario es requerido")),

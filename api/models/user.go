@@ -19,13 +19,13 @@ type (
 )
 
 const (
-	// UserAdmin usuario con rol administrador (ADMIN)
+	// UserAdmin user with administrator role (ADMIN)
 	UserAdmin UserRole = iota + 1
 
-	// UserDoctor usuario con rol doctor (DOC)
+	// UserDoctor user with doctor role (DOC)
 	UserDoctor
 
-	// UserDefault usuario paciente (USR)
+	// UserDefault patient user or default user (USER)
 	UserDefault
 )
 
@@ -39,10 +39,10 @@ func (u UserRole) String() string {
 }
 
 const (
-	// IdentificationTypeCC tipo de identificación cedula de ciudadanía (CC)
+	// IdentificationTypeCC type of identification `cedula de ciudadanía` (CC)
 	IdentificationTypeCC UserIdentificationType = iota + 1
 
-	// IdentificationTypeCE tipo de identificación cedula de extranjería (CE)
+	// IdentificationTypeCE type of identification `cedula de extranjería` (CE)
 	IdentificationTypeCE
 )
 
@@ -55,7 +55,7 @@ func (u UserIdentificationType) String() string {
 	return val[u-1]
 }
 
-// User representa un usuario
+// User represents the data about an user.
 type User struct {
 	utils.Model
 

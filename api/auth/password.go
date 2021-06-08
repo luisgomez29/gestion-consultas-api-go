@@ -17,7 +17,7 @@ var (
 	errIncompatibleVersion = errors.New("incompatible version of argon2")
 )
 
-// passwordConfig configuración para generar el hash.
+// passwordConfig is the configuration to generate the password hash.
 type passwordConfig struct {
 	memory      uint32
 	iterations  uint32

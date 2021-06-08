@@ -8,7 +8,7 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
 )
 
-// GroupRepository encapsula la lógica para acceder a los permisos.
+// GroupRepository encapsulates the logic to access groups from the data source.
 type GroupRepository interface {
 	All() ([]*models.Permission, error)
 	Get(codename string) (*models.Permission, error)
@@ -22,7 +22,7 @@ type groupRepository struct {
 	conn *pgxpool.Pool
 }
 
-// NewGroupRepository crea un nuevo repositorio de grupos.
+// NewGroupRepository creates a new group repository.
 func NewGroupRepository(db *pgxpool.Pool) GroupRepository {
 	return groupRepository{conn: db}
 }

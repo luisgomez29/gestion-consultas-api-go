@@ -12,7 +12,7 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/utils"
 )
 
-// AccountRepository encapsula la lógica para acceder a los usuarios desde la base de datos.
+// AccountRepository encapsulates the logic to access users from the data source.
 type AccountRepository interface {
 	CreateUser(res *responses.SignUpResponse) (*models.User, error)
 	FindUser(username string) (*models.User, error)
@@ -23,7 +23,7 @@ type accountRepository struct {
 	group GroupRepository
 }
 
-// NewAccountRepository crea un nuevo repositorio de autenticación.
+// NewAccountRepository creates a new account repository.
 func NewAccountRepository(db *pgxpool.Pool, g GroupRepository) AccountRepository {
 	return accountRepository{conn: db, group: g}
 }
@@ -53,7 +53,7 @@ func (r accountRepository) CreateUser(res *responses.SignUpResponse) (*models.Us
 		return nil, user.ValidatePgError(err)
 	}
 
-	// Add user to Users group
+	// Add user to `Users` group
 	if err := r.group.SetUser(user.ID, 1); err != nil {
 		return nil, err
 	}

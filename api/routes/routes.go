@@ -1,4 +1,4 @@
-// Package routes contiene la definición de los endpoints de la API.
+// Package routes contains the definition of the API endpoints.
 package routes
 
 import (
@@ -8,7 +8,7 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/middlewares"
 )
 
-// AccountsHandlers establece las rutas para la autenticación y gestión de cuenta
+// AccountsHandlers defines the endpoints for authentication and account management.
 func AccountsHandlers(g *echo.Group, ctrl controllers.AccountsController) {
 	g.POST("/signup", ctrl.SignUp)
 	g.POST("/login", ctrl.Login)
@@ -16,7 +16,7 @@ func AccountsHandlers(g *echo.Group, ctrl controllers.AccountsController) {
 	g.POST("/password-reset", ctrl.PasswordReset)
 }
 
-// UsersHandlers establece las rutas para models.User
+// UsersHandlers defines the endpoints for users management.
 func UsersHandlers(g *echo.Group, ctrl controllers.UsersController) {
 	g.Use(middlewares.Authentication(true))
 	g.GET("/users", ctrl.UsersList)

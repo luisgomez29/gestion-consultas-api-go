@@ -96,15 +96,15 @@ type Passwords struct {
 	PasswordConfirm string `json:"password_confirm,omitempty"`
 }
 
-// ------ RESPONSES
+// ------ REQUESTS
 
-// SignUpResponse represents the user's request for the creation of an account.
-type SignUpResponse struct {
-	*UserBaseResponse
+// SignUpRequest represents the user's request for the creation of an account.
+type SignUpRequest struct {
+	*UserBaseRequest
 	Passwords
 }
 
-func (rs *SignUpResponse) Validate() error {
+func (rs *SignUpRequest) Validate() error {
 	return validation.ValidateStruct(rs,
 		validation.Field(&rs.FirstName, firstNameRule...),
 		validation.Field(&rs.LastName, lastNameRule...),
@@ -121,48 +121,48 @@ func (rs *SignUpResponse) Validate() error {
 	)
 }
 
-// LoginResponse represents the user's login request.
-type LoginResponse struct {
+// LoginRequest represents the user's login request.
+type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password,omitempty"`
 }
 
-func (rs *LoginResponse) Validate() error {
+func (rs *LoginRequest) Validate() error {
 	return validation.ValidateStruct(rs,
 		validation.Field(&rs.Username, usernameRule...),
 		validation.Field(&rs.Password, validation.Required.Error("la contraseña es requerida")),
 	)
 }
 
-// TokenResponse represents the request to verify or update a JWT token.
-type TokenResponse struct {
+// TokenRequest represents the request to verify or update a JWT token.
+type TokenRequest struct {
 	Token string `json:"token"`
 }
 
-func (rs *TokenResponse) Validate() error {
+func (rs *TokenRequest) Validate() error {
 	return validation.ValidateStruct(rs,
 		validation.Field(&rs.Token, tokenRule...),
 	)
 }
 
-// PasswordResetResponse represents the request to look up the user and send the password reset email.
-type PasswordResetResponse struct {
+// PasswordResetRequest represents the request to look up the user and send the password reset email.
+type PasswordResetRequest struct {
 	Username string `json:"username"`
 }
 
-func (rs *PasswordResetResponse) Validate() error {
+func (rs *PasswordResetRequest) Validate() error {
 	return validation.ValidateStruct(rs,
 		validation.Field(&rs.Username, usernameRule...),
 	)
 }
 
-// PasswordResetConfirmResponse represents the request to reset the password.
-type PasswordResetConfirmResponse struct {
-	TokenResponse
+// PasswordResetConfirmRequest represents the request to reset the password.
+type PasswordResetConfirmRequest struct {
+	TokenRequest
 	Passwords
 }
 
-func (rs *PasswordResetConfirmResponse) Validate() error {
+func (rs *PasswordResetConfirmRequest) Validate() error {
 	return validation.ValidateStruct(rs,
 		validation.Field(&rs.Token, tokenRule...),
 		validation.Field(&rs.Password, passwordRule...),

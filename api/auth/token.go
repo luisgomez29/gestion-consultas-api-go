@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
+	"github.com/luisgomez29/gestion-consultas-api/api/models"
 	"github.com/luisgomez29/gestion-consultas-api/api/utils"
 )
 
@@ -34,29 +35,40 @@ type Claims struct {
 	jwt.StandardClaims
 
 	TokenType string
-	Username  string
+	User      *models.User
 }
 
 // NewClaims create the claims with values for the Id, IssuedAt and Username.
-func NewClaims(username string) *Claims {
+func NewClaims(u *models.User) *Claims {
 	return &Claims{
 		StandardClaims: jwt.StandardClaims{
 			Id:       uuid.NewString(),
 			IssuedAt: time.Now().Unix(),
 		},
-		Username: username,
+		User: u,
 	}
 }
 
 // GenerateToken generate a JWT token from the claims.
 func GenerateToken(c *Claims) (string, error) {
-	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	claims := jwt.MapClaims{
 		"token_type": c.TokenType,
-		"username":   c.Username,
+		"username":   c.User.Username,
 		"jti":        c.Id,
 		"iat":        c.IssuedAt,
 		"exp":        c.ExpiresAt,
-	}).SignedString([]byte(config.Load("JWT_SIGNING_KEY")))
+	}
+
+	// Add role
+	if c.User.Role == models.UserAdmin.String() {
+		claims["admin"] = true
+	} else if c.User.Role == models.UserDoctor.String() {
+		claims["doctor"] = true
+	}
+
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(
+		[]byte(config.Load("JWT_SIGNING_KEY")),
+	)
 
 	if err != nil {
 		return "", echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -114,7 +126,7 @@ func ExtractToken(authzHeader string) (string, error) {
 }
 
 // newAccessAndRefreshClaims defines the claims of the access and refresh JWT token.
-func newAccessAndRefreshClaims(username string) ([]*Claims, error) {
+func newAccessAndRefreshClaims(u *models.User) ([]*Claims, error) {
 	atTime, err := utils.TimeDuration(config.Load("JWT_ACCESS_TOKEN_EXPIRATION_MINUTES"))
 	if err != nil {
 		return nil, errJWTimeSetting
@@ -125,14 +137,13 @@ func newAccessAndRefreshClaims(username string) ([]*Claims, error) {
 		return nil, errJWTimeSetting
 	}
 
-	acClaims := NewClaims(username)
+	acClaims := NewClaims(u)
 	acClaims.ExpiresAt = time.Now().Add(time.Minute * atTime).Unix()
 	acClaims.TokenType = JWTAccessToken
 
-	rfClaims := NewClaims(username)
+	rfClaims := NewClaims(u)
 	rfClaims.ExpiresAt = time.Now().Add(time.Hour * 24 * rtTime).Unix()
 	rfClaims.TokenType = JWTRefreshToken
 
-	claims := []*Claims{acClaims, rfClaims}
-	return claims, nil
+	return []*Claims{acClaims, rfClaims}, nil
 }

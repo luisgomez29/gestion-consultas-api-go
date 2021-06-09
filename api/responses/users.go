@@ -11,13 +11,15 @@ import (
 func UserResponse(u *models.User) *models.User {
 	if u.Role != models.UserAdmin.String() {
 		u.IsActive = false
+		u.IsSuperuser = false
+		u.IsStaff = false
 	}
 	u.Password = ""
 	return u
 }
 
-// UserBaseResponse contains the user fields that are returned regardless of role.
-type UserBaseResponse struct {
+// UserBaseRequest contains the user fields that are returned regardless of role.
+type UserBaseRequest struct {
 	FirstName            string  `json:"first_name"`
 	LastName             string  `json:"last_name"`
 	IdentificationType   string  `json:"identification_type"`
@@ -30,19 +32,19 @@ type UserBaseResponse struct {
 	Address              *string `json:"address"`
 }
 
-type UserDefaultResponse struct {
-	*UserBaseResponse
+type UserDefaultRequest struct {
+	*UserBaseRequest
 	utils.Model
 	Role      string     `json:"role"`
 	LastLogin *time.Time `json:"last_login"`
 }
 
-type UserDoctorResponse struct {
-	*UserDefaultResponse
+type UserDoctorRequest struct {
+	*UserDefaultRequest
 }
 
-type UserAdminResponse struct {
-	*UserDefaultResponse
+type UserAdminRequest struct {
+	*UserDefaultRequest
 	IsActive    bool `json:"is_active"`
 	IsStaff     bool `json:"is_staff"`
 	IsSuperuser bool `json:"is_superuser"`

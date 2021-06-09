@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/georgysavva/scany/pgxscan"
 
 	apierrors "github.com/luisgomez29/gestion-consultas-api/api/errors"
 )
@@ -39,7 +39,7 @@ func PasswordValidator(value interface{}) error {
 
 // ValidateErrNoRows checks if the error is of type pgx.ErrNoRows.
 func ValidateErrNoRows(err error, msg string) error {
-	if errors.Is(err, pgx.ErrNoRows) {
+	if pgxscan.NotFound(err) {
 		return apierrors.NewErrNoRows(msg)
 	}
 	return err

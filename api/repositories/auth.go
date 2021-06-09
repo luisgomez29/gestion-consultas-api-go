@@ -10,8 +10,8 @@ import (
 )
 
 type AuthRepository interface {
-	// UserLoggedIn get the user who is logged in from UserRepository.Get.
-	UserLoggedIn(username string) *models.User
+	// GetUser get user from UserRepository.Get.
+	GetUser(username string) *models.User
 
 	// UserPermissions get the permissions that the user has in `user_permissions`.
 	UserPermissions(username string) ([]*models.Permission, error)
@@ -34,14 +34,14 @@ func NewAuthRepository(db *pgxpool.Pool, p PermissionRepository, u UserRepositor
 	return authRepository{conn: db, permission: p, user: u}
 }
 
-func (r authRepository) UserLoggedIn(username string) *models.User {
+func (r authRepository) GetUser(username string) *models.User {
 	user, _ := r.user.Get(username)
 	return user
 }
 
 func (r authRepository) UserPermissions(username string) ([]*models.Permission, error) {
 	query := `
-			SELECT DISTINCT p.id, p.name, p.content_type_id, p.codename
+			SELECT p.id, p.name, p.content_type_id, p.codename
 			FROM permissions as p
 				 INNER JOIN user_permissions up on p.id = up.permission_id
 				 INNER JOIN users u on up.user_id = u.id
@@ -57,7 +57,7 @@ func (r authRepository) UserPermissions(username string) ([]*models.Permission, 
 
 func (r authRepository) UserGroupPermissions(username string) ([]*models.Permission, error) {
 	query := `
-			SELECT p.id, p.name, p.codename, p.content_type_id
+			SELECT DISTINCT p.id, p.name, p.codename, p.content_type_id
 			FROM permissions AS p
 				 INNER JOIN group_permissions gp on p.id = gp.permission_id
 				 INNER JOIN groups g on g.id = gp.group_id

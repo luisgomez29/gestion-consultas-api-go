@@ -29,6 +29,14 @@ const (
 	UserDefault
 )
 
+const (
+	// IdentificationTypeCC type of identification `cedula de ciudadanía` (CC)
+	IdentificationTypeCC UserIdentificationType = iota + 1
+
+	// IdentificationTypeCE type of identification `cedula de extranjería` (CE)
+	IdentificationTypeCE
+)
+
 func (u UserRole) String() string {
 	val := [...]string{"ADMIN", "DOC", "USR"}
 
@@ -37,14 +45,6 @@ func (u UserRole) String() string {
 	}
 	return val[u-1]
 }
-
-const (
-	// IdentificationTypeCC type of identification `cedula de ciudadanía` (CC)
-	IdentificationTypeCC UserIdentificationType = iota + 1
-
-	// IdentificationTypeCE type of identification `cedula de extranjería` (CE)
-	IdentificationTypeCE
-)
 
 func (u UserIdentificationType) String() string {
 	val := [...]string{"CC", "CE"}

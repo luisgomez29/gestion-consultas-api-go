@@ -20,6 +20,6 @@ func AccountsHandlers(g *echo.Group, ctrl controllers.AccountsController) {
 // UsersHandlers defines the endpoints for users management.
 func UsersHandlers(g *echo.Group, ctrl controllers.UsersController) {
 	g.Use(middlewares.Authentication(true))
-	g.GET("/users", ctrl.UsersList)
-	g.GET("/users/:username", ctrl.UsersRetrieve)
+	g.GET("/users", ctrl.All, middlewares.IsAdminOrDoctorUser)
+	g.GET("/users/:username", ctrl.Get, middlewares.IsAdminOrDoctorUser)
 }

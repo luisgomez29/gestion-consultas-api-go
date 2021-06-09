@@ -38,7 +38,7 @@ func NewAccountsController(at auth.Auth, a repositories.AccountRepository) Accou
 }
 
 func (ct accountsController) SignUp(c echo.Context) error {
-	input := new(responses.SignUpResponse)
+	input := new(responses.SignUpRequest)
 	if err := c.Bind(input); err != nil {
 		return apierrors.BadRequest("")
 	}
@@ -67,7 +67,7 @@ func (ct accountsController) SignUp(c echo.Context) error {
 }
 
 func (ct accountsController) Login(c echo.Context) error {
-	input := new(responses.LoginResponse)
+	input := new(responses.LoginRequest)
 	if err := c.Bind(input); err != nil {
 		return apierrors.BadRequest("")
 	}
@@ -91,7 +91,7 @@ func (ct accountsController) Login(c echo.Context) error {
 }
 
 func (ct accountsController) VerifyToken(c echo.Context) error {
-	input := new(responses.TokenResponse)
+	input := new(responses.TokenRequest)
 	if err := c.Bind(input); err != nil {
 		return apierrors.BadRequest("")
 	}
@@ -115,7 +115,7 @@ func (ct accountsController) VerifyToken(c echo.Context) error {
 // PasswordReset verify if the user exists an email is sent with the link to reset the password,
 // which has a time of 15 minutes to expire. If the user does not have an email address, nothing is sent.
 func (ct accountsController) PasswordReset(c echo.Context) error {
-	input := new(responses.PasswordResetResponse)
+	input := new(responses.PasswordResetRequest)
 	if err := c.Bind(input); err != nil {
 		return apierrors.BadRequest("")
 	}
@@ -146,7 +146,7 @@ func (ct accountsController) PasswordReset(c echo.Context) error {
 	}
 
 	// Generate token
-	claims := auth.NewClaims(user.Username)
+	claims := auth.NewClaims(user)
 	claims.ExpiresAt = time.Now().Add(time.Minute * 15).Unix()
 	claims.TokenType = auth.JWTPasswordResetToken
 
@@ -183,7 +183,7 @@ func (ct accountsController) PasswordReset(c echo.Context) error {
 
 // PasswordResetConfirm allows the user to reset the password given a token
 func (ct accountsController) PasswordResetConfirm(c echo.Context) error {
-	input := new(responses.PasswordResetConfirmResponse)
+	input := new(responses.PasswordResetConfirmRequest)
 	if err := c.Bind(input); err != nil {
 		return apierrors.BadRequest("")
 	}
@@ -220,7 +220,7 @@ func (ct accountsController) PasswordResetConfirm(c echo.Context) error {
 // accountResponse returns the access and refresh JWT tokens and the user.
 //  For the user the attributes are shown depending on the role.
 func (ct accountsController) accountResponse(c echo.Context, user *models.User) error {
-	tokens, err := ct.auth.TokenObtainPair(user.Username)
+	tokens, err := ct.auth.TokenObtainPair(user)
 	if err != nil {
 		return err
 	}

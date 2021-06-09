@@ -2,9 +2,12 @@
 package auth
 
 import (
+	"fmt"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 
+	apierrors "github.com/luisgomez29/gestion-consultas-api/api/errors"
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
 	"github.com/luisgomez29/gestion-consultas-api/api/repositories"
 )
@@ -17,7 +20,7 @@ type Auth interface {
 	VerifyPassword(password, hashedPassword string) (bool, error)
 
 	// TokenObtainPair generates the JWT access and refresh tokens.
-	TokenObtainPair(username string) (map[string]string, error)
+	TokenObtainPair(u *models.User) (map[string]string, error)
 
 	// UsernameFromContext get the username of the request user.
 	UsernameFromContext(c echo.Context) string
@@ -36,6 +39,10 @@ type Auth interface {
 
 	// HasPermission check if the user has the specified permission.
 	HasPermission(u *models.User, perm string) (bool, error)
+
+	// CheckPermissions verify that the authenticated user is a superuser, otherwise that the user
+	// is the owner of the resource, or has the necessary permissions.
+	CheckPermissions(u *models.User, username, permission string) (bool, error)
 }
 
 type (
@@ -76,8 +83,8 @@ func (auth) VerifyPassword(password, hashedPassword string) (bool, error) {
 	return comparePasswordAndHash(password, hashedPassword)
 }
 
-func (auth) TokenObtainPair(username string) (map[string]string, error) {
-	claims, err := newAccessAndRefreshClaims(username)
+func (auth) TokenObtainPair(u *models.User) (map[string]string, error) {
+	claims, err := newAccessAndRefreshClaims(u)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +121,7 @@ func (a auth) IsAuthenticated(c echo.Context) (*AccessDetails, bool) {
 		return &AccessDetails{}, false
 	}
 
-	u := a.authRepo.UserLoggedIn(username)
+	u := a.authRepo.GetUser(username)
 	return &AccessDetails{User: u}, true
 }
 
@@ -163,4 +170,24 @@ func (a auth) HasPermission(u *models.User, perm string) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func (a auth) CheckPermissions(u *models.User, username, permission string) (bool, error) {
+	if !u.IsSuperuser {
+		hasPerm, err := a.HasPermission(u, fmt.Sprintf("%s_from_me", permission))
+		if err != nil {
+			return false, err
+		}
+
+		if a.isAccountOwner(u.Username, username) && !hasPerm ||
+			!a.isAccountOwner(u.Username, username) && !hasPerm {
+			return false, apierrors.Forbidden("")
+		}
+	}
+	return true, nil
+}
+
+// isAccountOwner verifies if an authenticated user is the owner of an account.
+func (auth) isAccountOwner(usernameAuth, username string) bool {
+	return usernameAuth == username
 }

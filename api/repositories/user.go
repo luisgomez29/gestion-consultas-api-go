@@ -15,8 +15,8 @@ type UserRepository interface {
 	All() ([]*models.User, error)
 	Get(username string) (*models.User, error)
 	Create(u *models.User) (*models.User, error)
-	Update(id uint, u *models.User) (*models.User, error)
-	Delete(id uint) (uint, error)
+	Update(username string, u *models.User) (*models.User, error)
+	Delete(username string) (uint, error)
 }
 
 //userRepository persists users in database.
@@ -49,7 +49,7 @@ func (r userRepository) Get(username string) (*models.User, error) {
 		FROM users WHERE username = $1 AND is_active = true`
 
 	user := new(models.User)
-	if err := pgxscan.Get(context.Background(), r.conn, user, query, &username); err != nil {
+	if err := pgxscan.Get(context.Background(), r.conn, user, query, username); err != nil {
 		return nil, utils.ValidateErrNoRows(err, "usuario no encontrado")
 	}
 	return user, nil
@@ -63,10 +63,10 @@ func (r userRepository) Create(u *models.User) (*models.User, error) {
 	panic("implement me")
 }
 
-func (r userRepository) Update(u uint, user *models.User) (*models.User, error) {
+func (r userRepository) Update(username string, user *models.User) (*models.User, error) {
 	panic("implement me")
 }
 
-func (r userRepository) Delete(u uint) (uint, error) {
+func (r userRepository) Delete(username string) (uint, error) {
 	panic("implement me")
 }

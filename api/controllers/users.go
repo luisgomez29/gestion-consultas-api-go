@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -14,8 +13,8 @@ import (
 
 // UsersController represents endpoints for users.
 type UsersController interface {
-	UsersList(c echo.Context) error
-	UsersRetrieve(c echo.Context) error
+	All(c echo.Context) error
+	Get(c echo.Context) error
 }
 
 type usersController struct {
@@ -28,33 +27,25 @@ func NewUsersController(at auth.Auth, u repositories.UserRepository) UsersContro
 	return usersController{auth: at, usersRepo: u}
 }
 
-func (ct usersController) UsersList(c echo.Context) error {
+func (ct usersController) All(c echo.Context) error {
 	users, err := ct.usersRepo.All()
 	if err != nil {
 		return err
 	}
 
-	authUser, _ := ct.auth.IsAuthenticated(c)
+	ad, _ := ct.auth.IsAuthenticated(c)
 
-	permissions, err := ct.auth.UserPermissions(authUser.User)
-	if err != nil {
-		return err
+	if ad.User.Role != models.UserAdmin.String() {
+		for i, user := range users {
+			users[i] = responses.UserResponse(user)
+		}
 	}
-
-	fmt.Printf("PERMISOS%v\n", permissions)
-
-	permission, err := ct.auth.HasPermission(authUser.User, "delete_permission")
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("TIENE PERMISO?%t\n", permission)
 
 	r := map[string][]*models.User{"results": users}
 	return c.JSON(http.StatusOK, r)
 }
 
-func (ct usersController) UsersRetrieve(c echo.Context) error {
+func (ct usersController) Get(c echo.Context) error {
 	user, err := ct.usersRepo.Get(c.Param("username"))
 	if err != nil {
 		return err

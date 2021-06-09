@@ -14,7 +14,7 @@ import (
 
 // AccountRepository encapsulates the logic to access users from the data source.
 type AccountRepository interface {
-	CreateUser(res *responses.SignUpResponse) (*models.User, error)
+	CreateUser(res *responses.SignUpRequest) (*models.User, error)
 	FindUser(username string) (*models.User, error)
 	SetPasswordUser(username, password string) error
 }
@@ -29,7 +29,7 @@ func NewAccountRepository(db *pgxpool.Pool, g GroupRepository) AccountRepository
 	return accountRepository{conn: db, group: g}
 }
 
-func (r accountRepository) CreateUser(res *responses.SignUpResponse) (*models.User, error) {
+func (r accountRepository) CreateUser(res *responses.SignUpRequest) (*models.User, error) {
 	query := `
 		INSERT INTO users(role, first_name, last_name, identification_type, identification_number, username, email,
 		password, phone, city, neighborhood, address, is_active, is_staff, is_superuser)
@@ -69,7 +69,7 @@ func (r accountRepository) FindUser(username string) (*models.User, error) {
 		FROM users WHERE username = $1 AND is_active = true`
 
 	user := new(models.User)
-	if err := pgxscan.Get(context.Background(), r.conn, user, query, &username); err != nil {
+	if err := pgxscan.Get(context.Background(), r.conn, user, query, username); err != nil {
 		return nil, utils.ValidateErrNoRows(err, "usuario o contraseña incorrectos")
 	}
 	return user, nil

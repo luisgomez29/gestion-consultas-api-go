@@ -64,9 +64,9 @@ func GenerateToken(c *Claims) (string, error) {
 	return token, nil
 }
 
-// VerifyToken does not verify the "token_type" claim. This is useful when performing general
-// validation of a token's signature.
-func VerifyToken(token string) (jwt.MapClaims, error) {
+// VerifyToken verify that the token is valid. If a value is assigned to the `tokenType` parameter,
+// the `token_type` of the claim is verified.
+func VerifyToken(token string, tokenType ...string) (jwt.MapClaims, error) {
 	tk, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.Load("JWT_SIGNING_KEY")), nil
 	})
@@ -88,24 +88,19 @@ func VerifyToken(token string) (jwt.MapClaims, error) {
 		}
 	}
 
-	if claims, ok := tk.Claims.(jwt.MapClaims); ok && tk.Valid {
+	claims, ok := tk.Claims.(jwt.MapClaims)
+	if !ok || !tk.Valid {
+		return nil, errJWTMissing
+	}
+
+	// Verify token type
+	if tokenType != nil {
+		if claims["token_type"] != tokenType[0] {
+			return nil, errJWTInvalid
+		}
 		return claims, nil
 	}
 
-	return nil, errJWTMissing
-}
-
-// VerifyTokenWithType verify that the token is valid and the "token_type" of the claim.
-func VerifyTokenWithType(token string, tokenType string) (jwt.MapClaims, error) {
-	claims, err := VerifyToken(token)
-	if err != nil {
-		return nil, err
-	}
-
-	// Verificar el tipo de token
-	if claims["token_type"] != tokenType {
-		return nil, errJWTInvalid
-	}
 	return claims, nil
 }
 

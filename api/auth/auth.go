@@ -19,9 +19,6 @@ type Auth interface {
 	// TokenObtainPair generates the JWT access and refresh tokens.
 	TokenObtainPair(username string) (map[string]string, error)
 
-	// VerifyToken verify that the token is valid.
-	VerifyToken(token string) (map[string]interface{}, error)
-
 	// UsernameFromContext get the username of the request user.
 	UsernameFromContext(c echo.Context) string
 
@@ -100,19 +97,6 @@ func (auth) TokenObtainPair(username string) (map[string]string, error) {
 		"refresh": refreshToken,
 	}
 	return tokens, nil
-}
-
-func (auth) VerifyToken(token string) (map[string]interface{}, error) {
-	claims, err := VerifyToken(token)
-	if err != nil {
-		return nil, err
-	}
-
-	r := map[string]interface{}{
-		"success": true,
-		"payload": claims,
-	}
-	return r, nil
 }
 
 func (a auth) UsernameFromContext(c echo.Context) string {

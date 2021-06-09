@@ -12,8 +12,9 @@ import (
 func AccountsHandlers(g *echo.Group, ctrl controllers.AccountsController) {
 	g.POST("/signup", ctrl.SignUp)
 	g.POST("/login", ctrl.Login)
-	g.POST("/verify-token", ctrl.VerifyToken)
-	g.POST("/password-reset", ctrl.PasswordReset)
+	g.POST("/token/verify", ctrl.VerifyToken)
+	g.POST("/password/reset", ctrl.PasswordReset)
+	g.POST("/password/reset/confirm", ctrl.PasswordResetConfirm)
 }
 
 // UsersHandlers defines the endpoints for users management.

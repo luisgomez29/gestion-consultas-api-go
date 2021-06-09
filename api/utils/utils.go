@@ -28,6 +28,15 @@ type Model struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+// PasswordValidator verify that the password has letters and numbers.
+func PasswordValidator(value interface{}) error {
+	s, _ := value.(string)
+	if ReDigit.Match([]byte(s)) || ReLetters.Match([]byte(s)) {
+		return errors.New("la contraseña debe tener letras y números")
+	}
+	return nil
+}
+
 // ValidateErrNoRows checks if the error is of type pgx.ErrNoRows.
 func ValidateErrNoRows(err error, msg string) error {
 	if errors.Is(err, pgx.ErrNoRows) {

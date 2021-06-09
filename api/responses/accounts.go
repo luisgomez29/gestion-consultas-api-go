@@ -1,7 +1,6 @@
 package responses
 
 import (
-	"errors"
 	"fmt"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -78,31 +77,33 @@ var (
 		validation.Length(8, 25).Error(
 			"la contraseña debe tener entre 8 y 25 caracteres",
 		),
-		validation.By(PasswordValidator),
+		validation.By(utils.PasswordValidator),
 	}
+
 	passwordConfirmationRule = []validation.Rule{
-		validation.Required.Error("la contraseña es requerida"),
+		validation.Required.Error("la contraseña de confirmación es requerida"),
 	}
 )
 
-// PasswordValidator verify that the password has letters and numbers.
-func PasswordValidator(value interface{}) error {
-	s, _ := value.(string)
-	if utils.ReDigit.Match([]byte(s)) || utils.ReLetters.Match([]byte(s)) {
-		return errors.New("la contraseña debe tener letras y números")
-	}
-	return nil
+// TokenRule verify token
+var tokenRule = []validation.Rule{
+	validation.Required.Error("el token es requerido"),
 }
+
+// Passwords represents the password and the confirmation password.
+type Passwords struct {
+	Password        string `json:"password,omitempty"`
+	PasswordConfirm string `json:"password_confirm,omitempty"`
+}
+
+// ------ RESPONSES
 
 // SignUpResponse represents the user's request for the creation of an account.
 type SignUpResponse struct {
 	*UserBaseResponse
-
-	Password             string `json:"password,omitempty"`
-	PasswordConfirmation string `json:"password_confirmation,omitempty"`
+	Passwords
 }
 
-// Validate valida los campos de SignUpResponse
 func (rs *SignUpResponse) Validate() error {
 	return validation.ValidateStruct(rs,
 		validation.Field(&rs.FirstName, firstNameRule...),
@@ -116,7 +117,7 @@ func (rs *SignUpResponse) Validate() error {
 		validation.Field(&rs.Neighborhood, neighborhoodRule...),
 		validation.Field(&rs.Address, addressRule...),
 		validation.Field(&rs.Password, passwordRule...),
-		validation.Field(&rs.PasswordConfirmation, passwordConfirmationRule...),
+		validation.Field(&rs.PasswordConfirm, passwordConfirmationRule...),
 	)
 }
 
@@ -126,7 +127,6 @@ type LoginResponse struct {
 	Password string `json:"password,omitempty"`
 }
 
-// Validate validates the LoginResponse fields.
 func (rs *LoginResponse) Validate() error {
 	return validation.ValidateStruct(rs,
 		validation.Field(&rs.Username, usernameRule...),
@@ -139,21 +139,33 @@ type TokenResponse struct {
 	Token string `json:"token"`
 }
 
-// Validate validates the TokenResponse fields.
 func (rs *TokenResponse) Validate() error {
 	return validation.ValidateStruct(rs,
-		validation.Field(&rs.Token, validation.Required.Error("el token es requerido")),
+		validation.Field(&rs.Token, tokenRule...),
 	)
 }
 
-// PasswordResetResponse represents the request to reset the password.
+// PasswordResetResponse represents the request to look up the user and send the password reset email.
 type PasswordResetResponse struct {
 	Username string `json:"username"`
 }
 
-// Validate validates the PasswordResetResponse fields.
 func (rs *PasswordResetResponse) Validate() error {
 	return validation.ValidateStruct(rs,
-		validation.Field(&rs.Username, validation.Required.Error("el nombre de usuario es requerido")),
+		validation.Field(&rs.Username, usernameRule...),
+	)
+}
+
+// PasswordResetConfirmResponse represents the request to reset the password.
+type PasswordResetConfirmResponse struct {
+	TokenResponse
+	Passwords
+}
+
+func (rs *PasswordResetConfirmResponse) Validate() error {
+	return validation.ValidateStruct(rs,
+		validation.Field(&rs.Token, tokenRule...),
+		validation.Field(&rs.Password, passwordRule...),
+		validation.Field(&rs.PasswordConfirm, passwordConfirmationRule...),
 	)
 }

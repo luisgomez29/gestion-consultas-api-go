@@ -68,7 +68,9 @@ La API REST proporciona las siguientes rutas:
 | ---- | ----- | --------- | ------ |
 | Signup | /signup | No | POST |
 | Login | /login | No | POST |
-| Verify token | /verify-token | No | POST |
+| Verify token | /token/verify | No | POST |
+| Password reset| /password/reset | No | POST |
+| Password reset confirm| /password/reset/confirm | No | POST |
 
 ### Users
 

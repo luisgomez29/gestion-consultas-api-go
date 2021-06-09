@@ -24,6 +24,7 @@ type AccountsController interface {
 	Login(c echo.Context) error
 	VerifyToken(c echo.Context) error
 	PasswordReset(c echo.Context) error
+	PasswordResetConfirm(c echo.Context) error
 }
 
 type accountsController struct {
@@ -46,7 +47,7 @@ func (ct accountsController) SignUp(c echo.Context) error {
 		return err
 	}
 
-	if input.Password != input.PasswordConfirmation {
+	if input.Password != input.PasswordConfirm {
 		return apierrors.PasswordMismatch
 	}
 
@@ -99,12 +100,16 @@ func (ct accountsController) VerifyToken(c echo.Context) error {
 		return err
 	}
 
-	data, err := ct.auth.VerifyToken(input.Token)
+	claims, err := auth.VerifyToken(input.Token)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, data)
+	res := map[string]interface{}{
+		"success": true,
+		"payload": claims,
+	}
+	return c.JSON(http.StatusOK, res)
 }
 
 // PasswordReset verify if the user exists an email is sent with the link to reset the password,
@@ -129,7 +134,7 @@ func (ct accountsController) PasswordReset(c echo.Context) error {
 	}
 
 	// Response
-	r := map[string]interface{}{
+	res := map[string]interface{}{
 		"send_email": false,
 		"username":   user.Username,
 		"email":      user.Email,
@@ -137,7 +142,7 @@ func (ct accountsController) PasswordReset(c echo.Context) error {
 
 	// Verify if the user does not have email
 	if user.Email == nil {
-		return c.JSON(http.StatusOK, r)
+		return c.JSON(http.StatusOK, res)
 	}
 
 	// Generate token
@@ -172,8 +177,44 @@ func (ct accountsController) PasswordReset(c echo.Context) error {
 		return err
 	}
 
-	r["send_email"] = ok
-	return c.JSON(http.StatusOK, r)
+	res["send_email"] = ok
+	return c.JSON(http.StatusOK, res)
+}
+
+// PasswordResetConfirm allows the user to reset the password given a token
+func (ct accountsController) PasswordResetConfirm(c echo.Context) error {
+	input := new(responses.PasswordResetConfirmResponse)
+	if err := c.Bind(input); err != nil {
+		return apierrors.BadRequest("")
+	}
+
+	if err := input.Validate(); err != nil {
+		return err
+	}
+
+	claims, err := auth.VerifyToken(input.Token, auth.JWTPasswordResetToken)
+	if err != nil {
+		return err
+	}
+
+	if input.Password != input.PasswordConfirm {
+		return apierrors.PasswordMismatch
+	}
+
+	password, err := ct.auth.HashPassword(input.Password)
+	if err != nil {
+		return err
+	}
+
+	if err = ct.accountsRepo.SetPasswordUser(claims["username"].(string), password); err != nil {
+		return err
+	}
+
+	res := map[string]interface{}{
+		"success": true,
+		"message": "restablecimiento de contraseña completado",
+	}
+	return c.JSON(http.StatusOK, res)
 }
 
 // accountResponse returns the access and refresh JWT tokens and the user.

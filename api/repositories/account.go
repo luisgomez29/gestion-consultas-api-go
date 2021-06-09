@@ -16,6 +16,7 @@ import (
 type AccountRepository interface {
 	CreateUser(res *responses.SignUpResponse) (*models.User, error)
 	FindUser(username string) (*models.User, error)
+	SetPasswordUser(username, password string) error
 }
 
 type accountRepository struct {
@@ -54,7 +55,7 @@ func (r accountRepository) CreateUser(res *responses.SignUpResponse) (*models.Us
 	}
 
 	// Add user to `Users` group
-	if err := r.group.SetUser(user.ID, 1); err != nil {
+	if err = r.group.SetUser(user.ID, 1); err != nil {
 		return nil, err
 	}
 
@@ -72,4 +73,12 @@ func (r accountRepository) FindUser(username string) (*models.User, error) {
 		return nil, utils.ValidateErrNoRows(err, "usuario o contraseña incorrectos")
 	}
 	return user, nil
+}
+
+func (r accountRepository) SetPasswordUser(username, password string) error {
+	query := `UPDATE users SET password = $1, updated_at = CURRENT_TIMESTAMP WHERE username = $2 AND is_active = true`
+	if _, err := r.conn.Exec(context.Background(), query, password, username); err != nil {
+		return err
+	}
+	return nil
 }

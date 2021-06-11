@@ -8,15 +8,16 @@ import (
 	"github.com/jinzhu/copier"
 
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
-	"github.com/luisgomez29/gestion-consultas-api/api/responses"
 	"github.com/luisgomez29/gestion-consultas-api/api/utils"
+	"github.com/luisgomez29/gestion-consultas-api/api/utils/requests"
 )
 
 // AccountRepository encapsulates the logic to access users from the data source.
 type AccountRepository interface {
-	CreateUser(res *responses.SignUpRequest) (*models.User, error)
+	CreateUser(res *requests.SignUpRequest) (*models.User, error)
 	FindUser(username string) (*models.User, error)
 	SetPasswordUser(username, password string) error
+	UpdateLastLogin(username string) error
 }
 
 type accountRepository struct {
@@ -29,11 +30,11 @@ func NewAccountRepository(db *pgxpool.Pool, g GroupRepository) AccountRepository
 	return accountRepository{conn: db, group: g}
 }
 
-func (r accountRepository) CreateUser(res *responses.SignUpRequest) (*models.User, error) {
+func (r accountRepository) CreateUser(res *requests.SignUpRequest) (*models.User, error) {
 	query := `
 		INSERT INTO users(role, first_name, last_name, identification_type, identification_number, username, email,
-		password, phone, city, neighborhood, address, is_active, is_staff, is_superuser)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+		password, phone, city, neighborhood, address, is_active, is_staff, is_superuser, last_login)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, CURRENT_TIMESTAMP)
 		RETURNING id, created_at, updated_at`
 
 	user := new(models.User)
@@ -78,6 +79,17 @@ func (r accountRepository) FindUser(username string) (*models.User, error) {
 func (r accountRepository) SetPasswordUser(username, password string) error {
 	query := `UPDATE users SET password = $1, updated_at = CURRENT_TIMESTAMP WHERE username = $2 AND is_active = true`
 	if _, err := r.conn.Exec(context.Background(), query, password, username); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r accountRepository) UpdateLastLogin(username string) error {
+	query := `
+			UPDATE users SET last_login = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP 
+			WHERE username = $1 AND is_active = true`
+
+	if _, err := r.conn.Exec(context.Background(), query, username); err != nil {
 		return err
 	}
 	return nil

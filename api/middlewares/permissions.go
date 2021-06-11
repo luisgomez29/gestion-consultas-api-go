@@ -13,7 +13,7 @@ func IsAdminUser(next echo.HandlerFunc) echo.HandlerFunc {
 		claims := c.Get("user").(jwt.MapClaims)
 		admin, ok := claims["admin"].(bool)
 		if !admin || !ok {
-			return apierrors.Unauthorized("")
+			return apierrors.Forbidden("")
 		}
 		return next(c)
 	}
@@ -29,8 +29,8 @@ func IsAdminOrDoctorUser(next echo.HandlerFunc) echo.HandlerFunc {
 			if admin || doctor {
 				return next(c)
 			}
-			return apierrors.Unauthorized("")
+			return apierrors.Forbidden("")
 		}
-		return apierrors.Unauthorized("")
+		return apierrors.Forbidden("")
 	}
 }

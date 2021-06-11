@@ -1,22 +1,4 @@
-package responses
-
-import (
-	"time"
-
-	"github.com/luisgomez29/gestion-consultas-api/api/models"
-	"github.com/luisgomez29/gestion-consultas-api/api/utils"
-)
-
-// UserResponse lists the fields to return for the user types.
-func UserResponse(u *models.User) *models.User {
-	if u.Role != models.UserAdmin.String() {
-		u.IsActive = false
-		u.IsSuperuser = false
-		u.IsStaff = false
-	}
-	u.Password = ""
-	return u
-}
+package requests
 
 // UserBaseRequest contains the user fields that are returned regardless of role.
 type UserBaseRequest struct {
@@ -32,19 +14,17 @@ type UserBaseRequest struct {
 	Address              *string `json:"address"`
 }
 
+// UserDefaultRequest represents the request to create a user with a models.UserDefault or models.UserDoctor role.
 type UserDefaultRequest struct {
 	*UserBaseRequest
-	utils.Model
-	Role      string     `json:"role"`
-	LastLogin *time.Time `json:"last_login"`
+
+	Role string `json:"role"`
 }
 
-type UserDoctorRequest struct {
-	*UserDefaultRequest
-}
-
+// UserAdminRequest represents the request to create a user with the models.UserAdmin role.
 type UserAdminRequest struct {
 	*UserDefaultRequest
+
 	IsActive    bool `json:"is_active"`
 	IsStaff     bool `json:"is_staff"`
 	IsSuperuser bool `json:"is_superuser"`

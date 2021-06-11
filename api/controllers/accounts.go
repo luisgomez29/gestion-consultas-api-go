@@ -12,10 +12,11 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/auth"
 	"github.com/luisgomez29/gestion-consultas-api/api/config"
 	apierrors "github.com/luisgomez29/gestion-consultas-api/api/errors"
-	"github.com/luisgomez29/gestion-consultas-api/api/mailers"
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
 	"github.com/luisgomez29/gestion-consultas-api/api/repositories"
-	"github.com/luisgomez29/gestion-consultas-api/api/responses"
+	"github.com/luisgomez29/gestion-consultas-api/api/utils/mailer"
+	"github.com/luisgomez29/gestion-consultas-api/api/utils/requests"
+	"github.com/luisgomez29/gestion-consultas-api/api/utils/responses"
 )
 
 // AccountsController represents endpoints for authentication.
@@ -38,7 +39,7 @@ func NewAccountsController(at auth.Auth, a repositories.AccountRepository) Accou
 }
 
 func (ct accountsController) SignUp(c echo.Context) error {
-	input := new(responses.SignUpRequest)
+	input := new(requests.SignUpRequest)
 	if err := c.Bind(input); err != nil {
 		return apierrors.BadRequest("")
 	}
@@ -67,7 +68,7 @@ func (ct accountsController) SignUp(c echo.Context) error {
 }
 
 func (ct accountsController) Login(c echo.Context) error {
-	input := new(responses.LoginRequest)
+	input := new(requests.LoginRequest)
 	if err := c.Bind(input); err != nil {
 		return apierrors.BadRequest("")
 	}
@@ -81,17 +82,20 @@ func (ct accountsController) Login(c echo.Context) error {
 		return err
 	}
 
-	// Check if password is valid
 	match, err := ct.auth.VerifyPassword(input.Password, user.Password)
 	if !match || err != nil {
 		return apierrors.Unauthorized("la contraseña ingresada es incorrecta")
+	}
+
+	if err = ct.accountsRepo.UpdateLastLogin(user.Username); err != nil {
+		return err
 	}
 
 	return ct.accountResponse(c, user)
 }
 
 func (ct accountsController) VerifyToken(c echo.Context) error {
-	input := new(responses.TokenRequest)
+	input := new(requests.TokenRequest)
 	if err := c.Bind(input); err != nil {
 		return apierrors.BadRequest("")
 	}
@@ -115,7 +119,7 @@ func (ct accountsController) VerifyToken(c echo.Context) error {
 // PasswordReset verify if the user exists an email is sent with the link to reset the password,
 // which has a time of 15 minutes to expire. If the user does not have an email address, nothing is sent.
 func (ct accountsController) PasswordReset(c echo.Context) error {
-	input := new(responses.PasswordResetRequest)
+	input := new(requests.PasswordResetRequest)
 	if err := c.Bind(input); err != nil {
 		return apierrors.BadRequest("")
 	}
@@ -156,10 +160,10 @@ func (ct accountsController) PasswordReset(c echo.Context) error {
 	}
 
 	// Email message
-	em := &mailers.EmailMessage{
+	em := &mailer.EmailMessage{
 		To:      mail.Address{Name: user.FirstName, Address: *user.Email},
 		Subject: "Solicitud de recuperación de contraseña",
-		Template: mailers.Template{
+		Template: mailer.Template{
 			Name: "accounts/password_reset_key_message.html",
 			Context: map[string]interface{}{
 				"currentSite":   "Gestión consultas",
@@ -172,7 +176,7 @@ func (ct accountsController) PasswordReset(c echo.Context) error {
 	}
 
 	// Send email
-	ok, err := mailers.Send(em)
+	ok, err := mailer.Send(em)
 	if !ok || err != nil {
 		return err
 	}
@@ -183,7 +187,7 @@ func (ct accountsController) PasswordReset(c echo.Context) error {
 
 // PasswordResetConfirm allows the user to reset the password given a token
 func (ct accountsController) PasswordResetConfirm(c echo.Context) error {
-	input := new(responses.PasswordResetConfirmRequest)
+	input := new(requests.PasswordResetConfirmRequest)
 	if err := c.Bind(input); err != nil {
 		return apierrors.BadRequest("")
 	}
@@ -228,6 +232,6 @@ func (ct accountsController) accountResponse(c echo.Context, user *models.User) 
 	return c.JSON(http.StatusCreated, auth.JWTResponse{
 		AccessToken:  tokens["access"],
 		RefreshToken: tokens["refresh"],
-		User:         responses.UserResponse(user),
+		User:         responses.UserResponse(user.Role, user),
 	})
 }

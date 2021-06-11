@@ -8,7 +8,7 @@ import (
 	"github.com/luisgomez29/gestion-consultas-api/api/auth"
 	"github.com/luisgomez29/gestion-consultas-api/api/models"
 	"github.com/luisgomez29/gestion-consultas-api/api/repositories"
-	"github.com/luisgomez29/gestion-consultas-api/api/responses"
+	"github.com/luisgomez29/gestion-consultas-api/api/utils/responses"
 )
 
 // UsersController represents endpoints for users.
@@ -34,14 +34,7 @@ func (ct usersController) All(c echo.Context) error {
 	}
 
 	ad, _ := ct.auth.IsAuthenticated(c)
-
-	if ad.User.Role != models.UserAdmin.String() {
-		for i, user := range users {
-			users[i] = responses.UserResponse(user)
-		}
-	}
-
-	r := map[string][]*models.User{"results": users}
+	r := map[string][]*models.User{"results": responses.UserManyResponse(ad.User.Role, users)}
 	return c.JSON(http.StatusOK, r)
 }
 
@@ -51,9 +44,6 @@ func (ct usersController) Get(c echo.Context) error {
 		return err
 	}
 
-	if user.Role != models.UserAdmin.String() {
-		user = responses.UserResponse(user)
-	}
-
-	return c.JSON(http.StatusOK, user)
+	ad, _ := ct.auth.IsAuthenticated(c)
+	return c.JSON(http.StatusOK, responses.UserResponse(ad.User.Role, user))
 }

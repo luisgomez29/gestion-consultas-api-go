@@ -1,7 +1,7 @@
 # Migraciones
 
-En la carpeta `migrations` es el entorno de migración. En el entorno de migración esta la carpeta `versions` que
-contiene los scripts de versiones individuales.
+La carpeta `migrations` es el entorno de migración. En el entorno de migración esta las carpetas `versions` que
+contiene los scripts de versiones individuales y `db` que contiene archivos de consultas y el archivo DML inicial del esquema de la base de datos.
 
 Se usa [golang-migrate](https://github.com/golang-migrate/migrate) para hacer la migraciones a la base de datos
 PostgreSQL.

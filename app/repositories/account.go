@@ -14,9 +14,9 @@ import (
 
 // AccountRepository encapsulates the logic to access users from the data source.
 type AccountRepository interface {
-	CreateUser(res *requests.SignUpRequest) (*models.User, error)
+	CreateUser(input *requests.SignUpRequest) (*models.User, error)
 	FindUser(username string) (*models.User, error)
-	SetPasswordUser(username, password string) error
+	SetPasswordUser(username, hashedPassword string) error
 	UpdateLastLogin(username string) error
 }
 
@@ -30,7 +30,7 @@ func NewAccountRepository(db *pgxpool.Pool, g GroupRepository) AccountRepository
 	return accountRepository{conn: db, group: g}
 }
 
-func (r accountRepository) CreateUser(res *requests.SignUpRequest) (*models.User, error) {
+func (r accountRepository) CreateUser(input *requests.SignUpRequest) (*models.User, error) {
 	query := `
 		INSERT INTO users(role, first_name, last_name, identification_type, identification_number, username, email,
 		password, phone, city, neighborhood, address, is_active, is_staff, is_superuser, last_login)
@@ -38,7 +38,7 @@ func (r accountRepository) CreateUser(res *requests.SignUpRequest) (*models.User
 		RETURNING id, created_at, updated_at`
 
 	user := new(models.User)
-	if err := copier.Copy(user, res); err != nil {
+	if err := copier.Copy(user, input); err != nil {
 		return nil, err
 	}
 
@@ -76,9 +76,9 @@ func (r accountRepository) FindUser(username string) (*models.User, error) {
 	return user, nil
 }
 
-func (r accountRepository) SetPasswordUser(username, password string) error {
+func (r accountRepository) SetPasswordUser(username, hashedPassword string) error {
 	query := `UPDATE users SET password = $1, updated_at = CURRENT_TIMESTAMP WHERE username = $2 AND is_active = true`
-	if _, err := r.conn.Exec(context.Background(), query, password, username); err != nil {
+	if _, err := r.conn.Exec(context.Background(), query, hashedPassword, username); err != nil {
 		return err
 	}
 	return nil

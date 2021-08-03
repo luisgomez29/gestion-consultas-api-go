@@ -25,22 +25,22 @@ func NewUsersService(at auth.Auth, u repositories.UserRepository) UsersService {
 	return usersService{auth: at, usersRepo: u}
 }
 
-func (ct usersService) All(c echo.Context) (map[string][]*models.User, error) {
-	users, err := ct.usersRepo.All()
+func (s usersService) All(c echo.Context) (map[string][]*models.User, error) {
+	users, err := s.usersRepo.All()
 	if err != nil {
 		return nil, err
 	}
 
-	ad, _ := ct.auth.IsAuthenticated(c)
+	ad, _ := s.auth.IsAuthenticated(c)
 	return map[string][]*models.User{"results": responses.UserManyResponse(ad.User.Role, users)}, nil
 }
 
-func (ct usersService) Get(c echo.Context) (*models.User, error) {
-	user, err := ct.usersRepo.Get(c.Param("username"))
+func (s usersService) Get(c echo.Context) (*models.User, error) {
+	user, err := s.usersRepo.Get(c.Param("username"))
 	if err != nil {
 		return nil, err
 	}
 
-	ad, _ := ct.auth.IsAuthenticated(c)
+	ad, _ := s.auth.IsAuthenticated(c)
 	return responses.UserResponse(ad.User.Role, user), nil
 }

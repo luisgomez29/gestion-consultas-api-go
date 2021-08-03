@@ -96,6 +96,13 @@ type Passwords struct {
 	PasswordConfirm string `json:"password_confirm,omitempty"`
 }
 
+func (p *Passwords) Validate() error {
+	return validation.ValidateStruct(p,
+		validation.Field(&p.Password, passwordRule...),
+		validation.Field(&p.PasswordConfirm, passwordConfirmationRule...),
+	)
+}
+
 // ------ REQUESTS
 
 // SignUpRequest represents the user's request for the creation of an account.
@@ -105,7 +112,7 @@ type SignUpRequest struct {
 }
 
 func (rs *SignUpRequest) Validate() error {
-	return validation.ValidateStruct(rs,
+	if err := validation.ValidateStruct(rs,
 		validation.Field(&rs.FirstName, firstNameRule...),
 		validation.Field(&rs.LastName, lastNameRule...),
 		validation.Field(&rs.IdentificationType, identificationTypeRule...),
@@ -116,9 +123,15 @@ func (rs *SignUpRequest) Validate() error {
 		validation.Field(&rs.City, cityRule...),
 		validation.Field(&rs.Neighborhood, neighborhoodRule...),
 		validation.Field(&rs.Address, addressRule...),
-		validation.Field(&rs.Password, passwordRule...),
-		validation.Field(&rs.PasswordConfirm, passwordConfirmationRule...),
-	)
+	); err != nil {
+		return err
+	}
+
+	if err := rs.Passwords.Validate(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // LoginRequest represents the user's login request.
@@ -163,9 +176,11 @@ type PasswordResetConfirmRequest struct {
 }
 
 func (rs *PasswordResetConfirmRequest) Validate() error {
-	return validation.ValidateStruct(rs,
-		validation.Field(&rs.Token, tokenRule...),
-		validation.Field(&rs.Password, passwordRule...),
-		validation.Field(&rs.PasswordConfirm, passwordConfirmationRule...),
-	)
+	if err := rs.TokenRequest.Validate(); err != nil {
+		return err
+	}
+	if err := rs.Passwords.Validate(); err != nil {
+		return err
+	}
+	return nil
 }

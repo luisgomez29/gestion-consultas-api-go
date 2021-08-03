@@ -28,8 +28,9 @@ func Setup(db *pgxpool.Pool, e *echo.Echo) {
 
 	// Services
 	usersService := services.NewUsersService(authn, usersRepo)
+	accountsService := services.NewAccountsService(authn, accountsRepo)
 
 	// Routes
-	Accounts(v1, controllers.NewAccountsController(authn, accountsRepo))
+	Accounts(v1, controllers.NewAccountsController(authn, accountsService))
 	Users(v1, controllers.NewUsersController(usersService))
 }

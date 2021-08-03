@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/jackc/pgx/v4/pgxpool"
+
 	"github.com/luisgomez29/gestion-consultas-api/pkg/config"
 )
 

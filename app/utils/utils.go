@@ -45,11 +45,10 @@ func ValidateErrNoRows(err error, msg string) error {
 	return err
 }
 
-// TimeDuration convert a string to time.Duration.
+// TimeDuration convert string to time.Duration.
 func TimeDuration(t string) (time.Duration, error) {
 	tc, err := strconv.Atoi(t)
 	if err != nil {
-		//log.Printf("Error converting in Integer %v", err)
 		return 0, err
 	}
 	return time.Duration(tc), nil
